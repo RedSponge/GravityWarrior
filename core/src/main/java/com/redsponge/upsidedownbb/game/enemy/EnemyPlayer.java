@@ -33,6 +33,7 @@ public class EnemyPlayer extends PActor implements IUpdated, Telegraph {
     private boolean onGround;
 
     private int gravityAttackStage;
+    private boolean plungeHit;
 
     public EnemyPlayer(PhysicsWorld worldIn, BossPlayer boss) {
         super(worldIn);
@@ -121,27 +122,11 @@ public class EnemyPlayer extends PActor implements IUpdated, Telegraph {
     }
 
     public int distanceFromBoss() {
-        int selfX, bossX;
-        if(pos.x > boss.pos.x + boss.size.x) {
-            selfX = pos.x;
-            bossX = boss.pos.x + boss.size.x;
-        } else {
-            selfX = pos.x + size.x;
-            bossX = boss.pos.x;
-        }
-        return Math.abs(bossX - selfX);
+        return Math.abs((pos.x + size.x / 2) - (boss.pos.x + boss.size.x / 2));
     }
 
     private int getRelativePositionFromBossMultiplier() {
-        int selfX, bossX;
-        if(pos.x > boss.pos.x + boss.size.x) {
-            selfX = pos.x;
-            bossX = boss.pos.x + boss.size.x;
-        } else {
-            selfX = pos.x + size.x;
-            bossX = boss.pos.x;
-        }
-        return (int) Math.signum(selfX - bossX);
+        return (int) Math.signum((pos.x + size.x / 2) - (boss.pos.x + boss.size.x / 2));
     }
 
     public void knockBack() {
@@ -153,6 +138,7 @@ public class EnemyPlayer extends PActor implements IUpdated, Telegraph {
     public void takenHit() {
         knockBack();
         hitTime = TimeUtils.nanoTime();
+        gravitySwitched = false;
     }
 
     public boolean hasRecoveredFromHit() {
@@ -185,12 +171,31 @@ public class EnemyPlayer extends PActor implements IUpdated, Telegraph {
                 vel.x = 0;
                 vel.y = 0;
                 gravityAttackStage = GravityAttackStage.PLUNGING;
+                onGround = false;
+                plungeHit = false;
             }
         } else if(gravityAttackStage == GravityAttackStage.PLUNGING) {
             gravitySwitched = false;
-            if(onGround) {
+            if(GeneralUtils.rectanglesIntersect(pos, size, boss.pos, boss.size)) {
+                Logger.log(this, "Hit enemy with plunge!");
+                knockBack();
+                plungeHit = true;
+            }
+            if(pos.y + size.y > 400) {
+                onGround = false;
+            } else if(onGround) {
+                Logger.log(this, "Ended attack!");
                 gravityAttackStage = GravityAttackStage.INACTIVE;
+                if(plungeHit) {
+                    stateMachine.changeState(EnemyPlayerState.RUN_AWAY);
+                } else {
+                    hitTime = TimeUtils.nanoTime();
+                }
             }
         }
+    }
+
+    public void setGravitySwitched(boolean gravitySwitched) {
+        this.gravitySwitched = gravitySwitched;
     }
 }

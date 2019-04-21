@@ -8,10 +8,11 @@ import com.redsponge.upsidedownbb.game.MessageType;
 public enum EnemyPlayerState implements State<EnemyPlayer> {
 
     RUN_AWAY() {
+
         @Override
         public void update(EnemyPlayer entity) {
             entity.moveAwayFromBoss();
-            if(MathUtils.randomBoolean(0.01f) && (entity.distanceFromBoss() > 50 || entity.isTouchingWalls())) {
+            if(MathUtils.randomBoolean(0.05f) && (entity.distanceFromBoss() > 100 || entity.isTouchingWalls())) {
                 if(MathUtils.randomBoolean()) {
                     entity.getStateMachine().changeState(SUPER_ATTACK_FROM_TOP);
                 } else {
