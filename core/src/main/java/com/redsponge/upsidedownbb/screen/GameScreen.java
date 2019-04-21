@@ -9,6 +9,7 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.viewport.FitViewport;
+import com.redsponge.upsidedownbb.game.Platform;
 import com.redsponge.upsidedownbb.game.boss.BossPlayer;
 import com.redsponge.upsidedownbb.game.boss.BossPlayerRenderer;
 import com.redsponge.upsidedownbb.game.enemy.EnemyPlayer;
@@ -45,7 +46,7 @@ public class GameScreen extends AbstractScreen implements InputProcessor {
         world = new PhysicsWorld();
         boss = new BossPlayer(world);
 
-        floor = new PSolid(world);
+        floor = new Platform(world);
 
         floor.pos.set(0, 0);
         floor.size.set((int) gameViewport.getWorldWidth(), Constants.FLOOR_HEIGHT);
@@ -55,14 +56,14 @@ public class GameScreen extends AbstractScreen implements InputProcessor {
         world.addActor(boss);
         world.addSolid(floor);
 
-        PSolid rWall = new PSolid(world), lWall = new PSolid(world);
+        Platform rWall = new Platform(world), lWall = new Platform(world);
         rWall.pos.set(0, 0);
         rWall.size.set(1, (int) gameViewport.getWorldHeight());
 
         lWall.pos.set((int) gameViewport.getWorldWidth(), 0);
         lWall.size.set(1, (int) gameViewport.getWorldHeight());
 
-        PSolid ceiling = new PSolid(world);
+        Platform ceiling = new Platform(world);
         ceiling.size.set((int) gameViewport.getWorldWidth(), 1);
         ceiling.pos.set(0, (int) (gameViewport.getWorldHeight() - 1));
 
@@ -135,8 +136,7 @@ public class GameScreen extends AbstractScreen implements InputProcessor {
     @Override
     public boolean touchDown(int screenX, int screenY, int pointer, int button) {
         int x = (int) gameViewport.unproject(new Vector2(screenX, screenY)).x;
-        System.out.println(x);
-        boss.setWantedX(x);
+        boss.setDirection((int) Math.signum(x - boss.pos.x));
         return false;
     }
 

@@ -1,5 +1,7 @@
 package com.redsponge.upsidedownbb.game.boss;
 
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.ai.msg.MessageManager;
 import com.badlogic.gdx.ai.msg.Telegram;
 import com.badlogic.gdx.ai.msg.Telegraph;
@@ -21,12 +23,13 @@ public class BossPlayer extends PActor implements IUpdated, Telegraph {
     private boolean onGround;
     private Vector2 vel;
 
-    private int wantedX;
+    private int direction;
 
     private PunchBox punchBox;
     private long punchStartTime;
 
     private EnemyPlayer enemyPlayer;
+    private long dashStart;
 
     public BossPlayer(PhysicsWorld worldIn) {
         super(worldIn);
@@ -35,7 +38,8 @@ public class BossPlayer extends PActor implements IUpdated, Telegraph {
         pos.set((int) (Constants.GAME_WIDTH / 2 - size.x / 2), 100);
 
         vel = new Vector2(0, 0);
-        wantedX = 0;
+        direction = 0;
+        dashStart = 0;
     }
 
     public void setEnemyPlayer(EnemyPlayer enemyPlayer) {
@@ -51,8 +55,13 @@ public class BossPlayer extends PActor implements IUpdated, Telegraph {
 
         if(!isPunching()) {
             vel.add(0, Constants.WORLD_GRAVITY);
-            vel.x = Math.signum(wantedX - pos.x) * getSpeed();
-
+            vel.x = direction * getSpeed();
+            if(GeneralUtils.secondsSince(dashStart) < 0.2f) {
+                vel.x *= 20;
+            }
+            if(Gdx.input.isKeyJustPressed(Keys.SHIFT_LEFT)) {
+                dashStart = TimeUtils.nanoTime();
+            }
             if(onGround && input.isJustJumping()) {
                 vel.y = 200;
                 onGround = false;
@@ -73,6 +82,12 @@ public class BossPlayer extends PActor implements IUpdated, Telegraph {
 
     private void processPunch() {
         if(GeneralUtils.secondsSince(punchStartTime) > Constants.PUNCH_LENGTH && punchBox != null) {
+            endPunch();
+        }
+    }
+
+    private void endPunch() {
+        if(punchBox != null) {
             punchBox.remove();
             punchBox = null;
         }
@@ -93,7 +108,7 @@ public class BossPlayer extends PActor implements IUpdated, Telegraph {
     }
 
     public int getDirection() {
-        return vel.x >= 0 ? 1 : -1;
+        return direction;
     }
 
     private float getSpeed() {
@@ -103,12 +118,17 @@ public class BossPlayer extends PActor implements IUpdated, Telegraph {
         return 50;
     }
 
-    public void setWantedX(int x) {
-        this.wantedX = x - size.x / 2;
+    public void setDirection(int direction) {
+        this.direction = direction;
     }
 
     @Override
     public boolean handleMessage(Telegram msg) {
+        switch (msg.message) {
+            case MessageType.PLAYER_HIT:
+                endPunch();
+                break;
+        }
         return false;
     }
 }
