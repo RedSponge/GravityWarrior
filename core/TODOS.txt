@@ -1,0 +1,10 @@
+Boss Player:
+    - Roar Move
+    - Actual Sprites
+    - Roll Move
+
+Player:
+    - Create actor
+    - Create renderer
+    - Add gravity switching
+    - Research and work on AI
