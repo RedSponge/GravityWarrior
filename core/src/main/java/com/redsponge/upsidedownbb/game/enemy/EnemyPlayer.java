@@ -166,7 +166,7 @@ public class EnemyPlayer extends PActor implements IUpdated, Telegraph {
             }
         }
         else if(gravityAttackStage == GravityAttackStage.RUNNING_TO_ENEMY) {
-            vel.x = (boss.pos.x + boss.size.x / 2) - (pos.x + size.x / 2);
+            vel.x = -getRelativePositionFromBossMultiplier() * 200;
             if(Math.abs((pos.x + size.x / 2f) - (boss.pos.x + boss.size.x / 2f)) < 2) {
                 vel.x = 0;
                 vel.y = 0;
@@ -190,6 +190,8 @@ public class EnemyPlayer extends PActor implements IUpdated, Telegraph {
                     stateMachine.changeState(EnemyPlayerState.RUN_AWAY);
                 } else {
                     hitTime = TimeUtils.nanoTime();
+                    stateMachine.changeState(EnemyPlayerState.HIT);
+                    vel.set(0, 0);
                 }
             }
         }
