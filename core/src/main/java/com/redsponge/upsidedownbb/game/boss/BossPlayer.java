@@ -2,12 +2,15 @@ package com.redsponge.upsidedownbb.game.boss;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
+import com.badlogic.gdx.ai.fsm.DefaultStateMachine;
+import com.badlogic.gdx.ai.fsm.StateMachine;
 import com.badlogic.gdx.ai.msg.MessageManager;
 import com.badlogic.gdx.ai.msg.Telegram;
 import com.badlogic.gdx.ai.msg.Telegraph;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.TimeUtils;
 import com.redsponge.upsidedownbb.game.MessageType;
+import com.redsponge.upsidedownbb.game.Platform;
 import com.redsponge.upsidedownbb.game.enemy.EnemyPlayer;
 import com.redsponge.upsidedownbb.input.InputTranslator;
 import com.redsponge.upsidedownbb.input.SimpleInputTranslator;
@@ -30,16 +33,20 @@ public class BossPlayer extends PActor implements IUpdated, Telegraph {
 
     private EnemyPlayer enemyPlayer;
     private long dashStart;
+    private StateMachine<BossPlayer, GroundPoundState> groundPoundStateMachine;
 
     public BossPlayer(PhysicsWorld worldIn) {
         super(worldIn);
         input = new SimpleInputTranslator();
-        size.set(200, 200);
+        size.set(Constants.BOSS_WIDTH, Constants.BOSS_HEIGHT);
         pos.set((int) (Constants.GAME_WIDTH / 2 - size.x / 2), 100);
 
         vel = new Vector2(0, 0);
         direction = 0;
         dashStart = 0;
+
+        groundPoundStateMachine = new DefaultStateMachine<BossPlayer, GroundPoundState>(this, GroundPoundState.INACTIVE);
+        groundPoundStateMachine.setGlobalState(GroundPoundState.GLOBAL);
     }
 
     public void setEnemyPlayer(EnemyPlayer enemyPlayer) {
@@ -52,8 +59,9 @@ public class BossPlayer extends PActor implements IUpdated, Telegraph {
             beginPunch();
         }
         processPunch();
+        groundPoundStateMachine.update();
 
-        if(!isPunching()) {
+        if(!isPunching() && !isGroundPounding()) {
             vel.add(0, Constants.WORLD_GRAVITY);
             vel.x = direction * getSpeed();
             if(GeneralUtils.secondsSince(dashStart) < 0.2f) {
@@ -62,18 +70,27 @@ public class BossPlayer extends PActor implements IUpdated, Telegraph {
             if(Gdx.input.isKeyJustPressed(Keys.SHIFT_LEFT)) {
                 dashStart = TimeUtils.nanoTime();
             }
-            if(onGround && input.isJustJumping()) {
-                vel.y = 200;
+            if(onGround && input.isJustJumping() && !isGroundPounding()) {
+                beginGroundPound();
                 onGround = false;
             }
-
-            moveX(vel.x * delta, null);
-            moveY(vel.y * delta, () -> {
-                if (vel.y < 0) {
-                    onGround = true;
-                }
-            });
         }
+
+        moveX(vel.x * delta, null);
+        moveY(vel.y * delta, () -> {
+            if (vel.y < 0) {
+                onGround = true;
+            }
+        });
+        onGround = collideFirst(pos.copy().add(0, -1)) instanceof Platform;
+    }
+
+    public boolean isGroundPounding() {
+        return groundPoundStateMachine.getCurrentState() != GroundPoundState.INACTIVE;
+    }
+
+    private void beginGroundPound() {
+        groundPoundStateMachine.changeState(GroundPoundState.RAISE);
     }
 
     private boolean isPunching() {
@@ -130,5 +147,21 @@ public class BossPlayer extends PActor implements IUpdated, Telegraph {
                 break;
         }
         return false;
+    }
+
+    public EnemyPlayer getEnemyPlayer() {
+        return enemyPlayer;
+    }
+
+    public Vector2 getVel() {
+        return vel;
+    }
+
+    public StateMachine<BossPlayer, GroundPoundState> getGroundPoundStateMachine() {
+        return groundPoundStateMachine;
+    }
+
+    public boolean isOnGround() {
+        return onGround;
     }
 }

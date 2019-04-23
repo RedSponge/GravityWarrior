@@ -76,7 +76,7 @@ public class EnemyPlayer extends PActor implements IUpdated, Telegraph {
     }
 
     public void moveAwayFromBoss() {
-        vel.x = Math.signum(pos.x - boss.pos.x) * 50;
+        vel.x = Math.signum(pos.x - boss.pos.x) * 100;
     }
 
     public StateMachine<EnemyPlayer, EnemyPlayerState> getStateMachine() {
@@ -122,7 +122,7 @@ public class EnemyPlayer extends PActor implements IUpdated, Telegraph {
     }
 
     public int distanceFromBoss() {
-        return Math.abs((pos.x + size.x / 2) - (boss.pos.x + boss.size.x / 2));
+        return Math.abs((pos.x + size.x / 2) - (boss.pos.x + boss.size.x / 2)) - Constants.BOSS_WIDTH / 2;
     }
 
     private int getRelativePositionFromBossMultiplier() {
@@ -130,7 +130,7 @@ public class EnemyPlayer extends PActor implements IUpdated, Telegraph {
     }
 
     public void knockBack() {
-        vel.x = 100 * getRelativePositionFromBossMultiplier();
+        vel.x = 300 * getRelativePositionFromBossMultiplier();
         vel.y = 300;
         onGround = false;
     }
@@ -174,7 +174,8 @@ public class EnemyPlayer extends PActor implements IUpdated, Telegraph {
                 onGround = false;
                 plungeHit = false;
             }
-        } else if(gravityAttackStage == GravityAttackStage.PLUNGING) {
+        }
+        else if(gravityAttackStage == GravityAttackStage.PLUNGING) {
             gravitySwitched = false;
             if(GeneralUtils.rectanglesIntersect(pos, size, boss.pos, boss.size)) {
                 Logger.log(this, "Hit enemy with plunge!");
@@ -183,7 +184,8 @@ public class EnemyPlayer extends PActor implements IUpdated, Telegraph {
             }
             if(pos.y + size.y > 400) {
                 onGround = false;
-            } else if(onGround) {
+            }
+            else if(onGround) {
                 Logger.log(this, "Ended attack!");
                 gravityAttackStage = GravityAttackStage.INACTIVE;
                 if(plungeHit) {
@@ -199,5 +201,9 @@ public class EnemyPlayer extends PActor implements IUpdated, Telegraph {
 
     public void setGravitySwitched(boolean gravitySwitched) {
         this.gravitySwitched = gravitySwitched;
+    }
+
+    public boolean isTouchingEnemy() {
+        return GeneralUtils.rectanglesIntersect(pos, size, boss.pos, boss.size);
     }
 }

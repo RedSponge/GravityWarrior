@@ -122,4 +122,9 @@ public class IntVector2 {
     public String toString() {
         return String.format("(%d, %d)", x, y);
     }
+
+    public void lerp(IntVector2 wantedGPPose, float alpha) {
+        x = (int) ((1 - alpha) * x + alpha * wantedGPPose.x);
+        y = (int) ((1 - alpha) * y + alpha * wantedGPPose.y);
+    }
 }
