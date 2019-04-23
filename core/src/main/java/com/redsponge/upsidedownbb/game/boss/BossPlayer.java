@@ -42,8 +42,8 @@ public class BossPlayer extends PActor implements IUpdated, Telegraph {
         pos.set((int) (Constants.GAME_WIDTH / 2 - size.x / 2), 100);
 
         vel = new Vector2(0, 0);
-        direction = 0;
         dashStart = 0;
+        direction = 1;
 
         groundPoundStateMachine = new DefaultStateMachine<BossPlayer, GroundPoundState>(this, GroundPoundState.INACTIVE);
         groundPoundStateMachine.setGlobalState(GroundPoundState.GLOBAL);

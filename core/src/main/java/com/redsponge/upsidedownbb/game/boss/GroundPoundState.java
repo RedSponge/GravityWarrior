@@ -5,7 +5,6 @@ import com.badlogic.gdx.ai.msg.Telegram;
 import com.badlogic.gdx.math.Interpolation;
 import com.badlogic.gdx.math.Vector2;
 import com.redsponge.upsidedownbb.utils.Constants;
-import com.redsponge.upsidedownbb.utils.GeneralUtils;
 import com.redsponge.upsidedownbb.utils.Logger;
 
 public enum GroundPoundState implements State<BossPlayer> {
