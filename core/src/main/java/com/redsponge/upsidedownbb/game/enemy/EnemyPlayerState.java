@@ -83,6 +83,13 @@ public enum EnemyPlayerState implements State<EnemyPlayer> {
         }
     },
 
+    IDLE() {
+        @Override
+        public void update(EnemyPlayer entity) {
+
+        }
+    },
+
     GLOBAL_STATE() {
         @Override
         public void update(EnemyPlayer entity) {
@@ -100,8 +107,9 @@ public enum EnemyPlayerState implements State<EnemyPlayer> {
             }
             return super.onMessage(entity, telegram);
         }
-    };
+    }
 
+    ;
 
     @Override
     public void enter(EnemyPlayer entity) {

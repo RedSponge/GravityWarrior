@@ -1,9 +1,12 @@
 package com.redsponge.upsidedownbb.utils;
 
+import com.badlogic.gdx.graphics.g2d.Animation;
+import com.badlogic.gdx.graphics.g2d.TextureAtlas;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.utils.TimeUtils;
+import com.redsponge.upsidedownbb.assets.AnimationDescriptor;
 
 import java.lang.reflect.Array;
-import java.util.Arrays;
 
 public class GeneralUtils {
 
@@ -43,5 +46,17 @@ public class GeneralUtils {
 
     public static float lerp(float current, float to, float a) {
         return (1 - a) * current + a * to;
+    }
+
+    public static com.badlogic.gdx.utils.Array<TextureRegion> queryAnimationFrames(TextureAtlas from, int numFrames, String frameName, int startsAt) {
+        TextureRegion[] out = new TextureRegion[numFrames];
+        for(int i = 0; i < numFrames; i++) {
+            out[i] = from.findRegion(frameName, i + startsAt);
+        }
+        return new com.badlogic.gdx.utils.Array<>(out);
+    }
+
+    public static Animation<TextureRegion> getAnimation(AnimationDescriptor descriptor, TextureAtlas atlas, int startsAt) {
+        return new Animation<TextureRegion>(descriptor.frameDuration, queryAnimationFrames(atlas, descriptor.numFrames, descriptor.name, startsAt), descriptor.playMode);
     }
 }

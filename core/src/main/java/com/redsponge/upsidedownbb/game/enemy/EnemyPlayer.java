@@ -19,6 +19,7 @@ import com.redsponge.upsidedownbb.physics.PSolid;
 import com.redsponge.upsidedownbb.physics.PhysicsWorld;
 import com.redsponge.upsidedownbb.utils.Constants;
 import com.redsponge.upsidedownbb.utils.GeneralUtils;
+import com.redsponge.upsidedownbb.utils.IntVector2;
 import com.redsponge.upsidedownbb.utils.Logger;
 
 public class EnemyPlayer extends PActor implements IUpdated, Telegraph {
@@ -39,7 +40,7 @@ public class EnemyPlayer extends PActor implements IUpdated, Telegraph {
         super(worldIn);
         this.boss = boss;
         pos.set(200, 200);
-        size.set(30, 60);
+        size.set(Constants.PLAYER_WIDTH, Constants.PLAYER_HEIGHT);
         vel = new Vector2();
 
         stateMachine = new DefaultStateMachine<EnemyPlayer, EnemyPlayerState>(this, EnemyPlayerState.RUN_AWAY);
@@ -89,12 +90,12 @@ public class EnemyPlayer extends PActor implements IUpdated, Telegraph {
     }
 
     public void startDuck() {
-        size.y = 10;
+        size.y = Constants.PLAYER_DUCK_HEIGHT;
         duckStart = TimeUtils.nanoTime();
     }
 
     public void endDuck() {
-        size.y = 60;
+        size.y = Constants.PLAYER_HEIGHT;
         stateMachine.changeState(EnemyPlayerState.RUN_AWAY);
     }
 
@@ -205,5 +206,17 @@ public class EnemyPlayer extends PActor implements IUpdated, Telegraph {
 
     public boolean isTouchingEnemy() {
         return GeneralUtils.rectanglesIntersect(pos, size, boss.pos, boss.size);
+    }
+
+    public boolean isPowered() {
+        return gravitySwitched;
+    }
+
+    public Vector2 getVel() {
+        return vel;
+    }
+
+    public int getDirection() {
+        return vel.x < 0 ? -1 : 1;
     }
 }

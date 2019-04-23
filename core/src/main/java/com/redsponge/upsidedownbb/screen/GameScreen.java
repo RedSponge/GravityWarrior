@@ -13,6 +13,7 @@ import com.redsponge.upsidedownbb.game.Platform;
 import com.redsponge.upsidedownbb.game.boss.BossPlayer;
 import com.redsponge.upsidedownbb.game.boss.BossPlayerRenderer;
 import com.redsponge.upsidedownbb.game.enemy.EnemyPlayer;
+import com.redsponge.upsidedownbb.game.enemy.EnemyPlayerRenderer;
 import com.redsponge.upsidedownbb.physics.PSolid;
 import com.redsponge.upsidedownbb.physics.PhysicsDebugRenderer;
 import com.redsponge.upsidedownbb.physics.PhysicsWorld;
@@ -32,8 +33,8 @@ public class GameScreen extends AbstractScreen implements InputProcessor {
     private PhysicsDebugRenderer pdr;
 
     private BossPlayerRenderer bossRenderer;
+    private EnemyPlayerRenderer enemyRenderer;
 
-    private Texture t;
     private FitViewport gameViewport;
 
     @Override
@@ -76,8 +77,7 @@ public class GameScreen extends AbstractScreen implements InputProcessor {
         world.addActor(enemyPlayer);
 
         bossRenderer = new BossPlayerRenderer(boss, assets);
-
-        t = new Texture("textures/boss/idle.png");
+        enemyRenderer = new EnemyPlayerRenderer(enemyPlayer, assets);
     }
 
     @Override
@@ -89,7 +89,7 @@ public class GameScreen extends AbstractScreen implements InputProcessor {
 
     @Override
     public void render() {
-        Gdx.gl.glClearColor(/*0.8f, 0.8f, 0.8f*/0, 0, 0, 1);
+        Gdx.gl.glClearColor(0.8f, 0.8f, 0.8f, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
         pdr.render(world, gameViewport.getCamera().combined);
@@ -99,6 +99,7 @@ public class GameScreen extends AbstractScreen implements InputProcessor {
 
         batch.begin();
         bossRenderer.render(batch, shapeRenderer, assets);
+        enemyRenderer.render(batch, shapeRenderer, assets);
         batch.end();
     }
 
@@ -114,7 +115,8 @@ public class GameScreen extends AbstractScreen implements InputProcessor {
 
     @Override
     public AssetDescriptor[] getRequiredAssets() {
-        return GeneralUtils.joinArrays(AssetDescriptor.class, BossPlayerRenderer.REQUIRED_ASSETS);
+        return GeneralUtils.joinArrays(AssetDescriptor.class, BossPlayerRenderer.REQUIRED_ASSETS,
+                EnemyPlayerRenderer.REQUIRED_ASSETS);
     }
 
 

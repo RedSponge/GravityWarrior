@@ -22,4 +22,9 @@ public class AssetDescBin {
         public static final AssetDescriptor<Texture> idle = new AssetDescriptor<Texture>("textures/boss/idle.png", Texture.class);
     }
 
+    public static final class Enemy {
+        public static final AssetDescriptor<TextureAtlas> unpowered = new AssetDescriptor<TextureAtlas>("textures/enemy/unpowered.atlas", TextureAtlas.class);
+        public static final AssetDescriptor<TextureAtlas> poweredOverlay = new AssetDescriptor<TextureAtlas>("textures/enemy/powered.atlas", TextureAtlas.class);
+    }
+
 }
