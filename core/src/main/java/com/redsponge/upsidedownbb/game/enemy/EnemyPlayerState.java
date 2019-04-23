@@ -69,7 +69,7 @@ public enum EnemyPlayerState implements State<EnemyPlayer> {
         }
     },
 
-    HIT() {
+    GOT_HIT() {
         @Override
         public void enter(EnemyPlayer entity) {
             entity.takenHit();
@@ -101,7 +101,7 @@ public enum EnemyPlayerState implements State<EnemyPlayer> {
             switch (telegram.message) {
                 case MessageType.PLAYER_HIT:
                     if(entity.hasRecoveredFromHit()) {
-                        entity.getStateMachine().changeState(HIT);
+                        entity.getStateMachine().changeState(GOT_HIT);
                     }
                     break;
             }

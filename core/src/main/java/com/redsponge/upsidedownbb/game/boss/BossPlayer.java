@@ -76,12 +76,14 @@ public class BossPlayer extends PActor implements IUpdated, Telegraph {
             }
         }
 
-        moveX(vel.x * delta, null);
-        moveY(vel.y * delta, () -> {
-            if (vel.y < 0) {
-                onGround = true;
-            }
-        });
+        if(!isPunching()) {
+            moveX(vel.x * delta, null);
+            moveY(vel.y * delta, () -> {
+                if (vel.y < 0) {
+                    onGround = true;
+                }
+            });
+        }
         onGround = collideFirst(pos.copy().add(0, -1)) instanceof Platform;
     }
 
@@ -118,7 +120,7 @@ public class BossPlayer extends PActor implements IUpdated, Telegraph {
         punchBox.pos.set(pos.copy().add(offsetX, Constants.PUNCH_SIZE.y / 2));
         punchBox.size.set(Constants.PUNCH_SIZE.copy());
 
-        worldIn.addSolid(punchBox);
+        worldIn.addActor(punchBox);
         punchStartTime = TimeUtils.nanoTime();
 
         MessageManager.getInstance().dispatchMessage(0, this, enemyPlayer, MessageType.BOSS_PUNCH_BEGIN);
@@ -163,5 +165,9 @@ public class BossPlayer extends PActor implements IUpdated, Telegraph {
 
     public boolean isOnGround() {
         return onGround;
+    }
+
+    public PunchBox getPunchBox() {
+        return punchBox;
     }
 }

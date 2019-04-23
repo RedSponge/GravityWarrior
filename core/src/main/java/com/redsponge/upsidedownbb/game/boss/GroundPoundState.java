@@ -4,7 +4,9 @@ import com.badlogic.gdx.ai.fsm.State;
 import com.badlogic.gdx.ai.msg.Telegram;
 import com.badlogic.gdx.math.Interpolation;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.utils.TimeUtils;
 import com.redsponge.upsidedownbb.utils.Constants;
+import com.redsponge.upsidedownbb.utils.GeneralUtils;
 import com.redsponge.upsidedownbb.utils.Logger;
 
 public enum GroundPoundState implements State<BossPlayer> {
@@ -14,6 +16,7 @@ public enum GroundPoundState implements State<BossPlayer> {
         private int startX;
         private Vector2 vel;
         private int wantedY;
+        private long startTime;
 
         @Override
         public void enter(BossPlayer entity) {
@@ -21,8 +24,9 @@ public enum GroundPoundState implements State<BossPlayer> {
             this.wantedX = entity.getEnemyPlayer().pos.x - entity.size.x / 2;
             this.startX = entity.pos.x;
             this.vel = entity.getVel();
-            this.wantedY = 300;
+            this.wantedY = 200;
             this.startY = entity.pos.y;
+            startTime = TimeUtils.nanoTime();
         }
 
         @Override
@@ -40,14 +44,19 @@ public enum GroundPoundState implements State<BossPlayer> {
                 overAllX = Math.abs(wantedX - startX);
             }
 
-            float progress = 1 - (Math.abs(distanceX / (float) overAllX));
+            float progress = GeneralUtils.secondsSince(startTime) / 0.5f;
 
-            vel.x = 500 * direction;
             vel.y = 0;
-            entity.pos.y = startY + (int) (Interpolation.circleOut.apply(progress) * 100);
-            Logger.log(this, "Current Progress:", progress);
+            vel.x = 0;
 
-            if(progress >= 0.9f || entity.pos.x == 1 || entity.pos.x + entity.size.x == Constants.GAME_WIDTH ) {
+            int neededY = startY + (int) (Interpolation.circleOut.apply(progress) * wantedY);
+            int neededX = startX + (int) (Interpolation.circleOut.apply(progress) * overAllX) * direction;
+
+            entity.moveX(Math.abs(neededX - entity.pos.x) * direction, null);
+            entity.moveY(Math.abs(neededY - entity.pos.y), null);
+
+
+            if(progress >= 0.9f) {
                 entity.getGroundPoundStateMachine().changeState(FALL);
             }
         }
@@ -64,7 +73,6 @@ public enum GroundPoundState implements State<BossPlayer> {
 
         @Override
         public void update(BossPlayer entity) {
-            Logger.log(this, "Falling!");
             vel.y += -100;
             vel.x = 0;
 

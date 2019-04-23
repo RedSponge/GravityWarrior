@@ -1,6 +1,7 @@
 package com.redsponge.upsidedownbb.game.enemy;
 
 import com.badlogic.gdx.assets.AssetDescriptor;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
@@ -21,6 +22,7 @@ public class EnemyPlayerRenderer implements IRenderer {
 
     public static final AssetDescriptor[] REQUIRED_ASSETS = {Enemy.unpowered, Enemy.poweredOverlay};
     private EnemyPlayer player;
+    private int renderWidth, renderHeight;
 
     private HashMap<String, Pair<Animation<TextureRegion>, Animation<TextureRegion>>> animations;
 
@@ -29,6 +31,10 @@ public class EnemyPlayerRenderer implements IRenderer {
     public EnemyPlayerRenderer(EnemyPlayer player, Assets assets) {
         this.player = player;
         startTime = TimeUtils.nanoTime();
+
+        renderWidth = 64;
+        renderHeight = 96;
+
         initAnimation(assets);
     }
 
@@ -47,21 +53,45 @@ public class EnemyPlayerRenderer implements IRenderer {
     @Override
     public void render(SpriteBatch batch, ShapeRenderer shapeRenderer, Assets assets) {
         String currentAnimation;
-        if(player.isTouchingWalls()) {
+        boolean flip = false;
+        GravityAttackState gravityAttackState = player.getGravityAttackStateMachine().getCurrentState();
+
+        if(player.isHeadStuck()) {
+            currentAnimation = "head_stuck";
+        } else if(!player.hasRecoveredFromHit()) {
+            currentAnimation = "hit";
+            flip = true;
+        } else if(player.isAttacking()) {
+            currentAnimation = "slice";
+            startTime = player.getAttackStartTime();
+        } else if(player.isDucking()) {
+            currentAnimation = "duck";
+            flip = true;
+            if(GeneralUtils.secondsSince(player.getDuckStartTime()) < .01f) {
+                startTime = TimeUtils.nanoTime();
+            }
+        } else if(player.isTouchingWalls()) {
             currentAnimation = "idle";
+        } else if(gravityAttackState == GravityAttackState.PLUNGING) {
+            currentAnimation = "plunging";
         } else {
             currentAnimation = "run";
         }
-        int x = player.pos.x;
-        int y = player.pos.y;
-        int w = player.size.x;
-        int h = player.size.y;
-        if(player.getDirection() == -1) {
+
+        int xOff = -(renderWidth - player.size.x) / 2;
+        int yOff = 0;
+
+        int x = player.pos.x + xOff;
+        int y = player.pos.y + yOff;
+
+        int w = renderWidth;
+        int h = renderHeight;
+        if(player.getDirection() == -1 && !flip || player.getDirection() == 1 && flip) {
             x += w;
             w *= -1;
         }
         if(player.isPowered()) {
-            y += h;
+            y += player.size.y;
             h *= -1;
         }
         Pair<Animation<TextureRegion>, Animation<TextureRegion>> animationPair = animations.get(currentAnimation);

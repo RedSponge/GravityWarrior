@@ -15,11 +15,11 @@ import com.redsponge.upsidedownbb.game.boss.BossPlayer;
 import com.redsponge.upsidedownbb.game.boss.PunchBox;
 import com.redsponge.upsidedownbb.physics.IUpdated;
 import com.redsponge.upsidedownbb.physics.PActor;
+import com.redsponge.upsidedownbb.physics.PEntity;
 import com.redsponge.upsidedownbb.physics.PSolid;
 import com.redsponge.upsidedownbb.physics.PhysicsWorld;
 import com.redsponge.upsidedownbb.utils.Constants;
 import com.redsponge.upsidedownbb.utils.GeneralUtils;
-import com.redsponge.upsidedownbb.utils.IntVector2;
 import com.redsponge.upsidedownbb.utils.Logger;
 
 public class EnemyPlayer extends PActor implements IUpdated, Telegraph {
@@ -28,13 +28,14 @@ public class EnemyPlayer extends PActor implements IUpdated, Telegraph {
     private Vector2 vel;
     private BossPlayer boss;
     private long duckStart;
+    private long attackStart;
 
     private StateMachine<EnemyPlayer, EnemyPlayerState> stateMachine;
+    private StateMachine<EnemyPlayer, GravityAttackState> gravityAttackStateMachine;
     private long hitTime;
     private boolean onGround;
 
-    private int gravityAttackStage;
-    private boolean plungeHit;
+    private boolean headStuck;
 
     public EnemyPlayer(PhysicsWorld worldIn, BossPlayer boss) {
         super(worldIn);
@@ -45,6 +46,8 @@ public class EnemyPlayer extends PActor implements IUpdated, Telegraph {
 
         stateMachine = new DefaultStateMachine<EnemyPlayer, EnemyPlayerState>(this, EnemyPlayerState.RUN_AWAY);
         stateMachine.setGlobalState(EnemyPlayerState.GLOBAL_STATE);
+
+        gravityAttackStateMachine = new DefaultStateMachine<EnemyPlayer, GravityAttackState>(this, GravityAttackState.INACTIVE);
     }
 
     @Override
@@ -54,8 +57,6 @@ public class EnemyPlayer extends PActor implements IUpdated, Telegraph {
             vel.y = 0;
         }
 
-        stateMachine.update();
-
         int mult = gravitySwitched ? -1 : 1;
         vel.add(0, Constants.WORLD_GRAVITY * mult);
 
@@ -64,16 +65,21 @@ public class EnemyPlayer extends PActor implements IUpdated, Telegraph {
         }
 
         moveY(vel.y * delta, null);
-        moveX(vel.x * delta, null);
+        moveX(vel.x * delta, () -> {if(!hasRecoveredFromHit()) {vel.x *= -1;}});
 
-        if(collideFirst(pos.copy().add(0, -1)) instanceof Platform) {onGround = true;}
+        onGround = false;
+        if(collideFirst(pos.copy().add(0, -1)) instanceof Platform) { onGround = true;}
         if(collideFirst(pos.copy().add(0, size.y + 1)) instanceof Platform) {onGround = true;}
 
-        PSolid collision = collideFirst(pos);
-        if(collision instanceof PunchBox) {
-            MessageManager.getInstance().dispatchMessage( 0, this, this, MessageType.PLAYER_HIT);
-            MessageManager.getInstance().dispatchMessage( 0, this, boss, MessageType.PLAYER_HIT);
+        if(boss.getPunchBox() != null) {
+            if(GeneralUtils.rectanglesIntersect(pos, size, boss.getPunchBox().pos, boss.getPunchBox().size)) {
+                MessageManager.getInstance().dispatchMessage( 0, this, this, MessageType.PLAYER_HIT);
+                MessageManager.getInstance().dispatchMessage( 0, this, boss, MessageType.PLAYER_HIT);
+            }
         }
+
+        if(hasRecoveredFromHit() && !isAttacking())
+            stateMachine.update();
     }
 
     public void moveAwayFromBoss() {
@@ -86,7 +92,7 @@ public class EnemyPlayer extends PActor implements IUpdated, Telegraph {
 
     @Override
     public boolean handleMessage(Telegram msg) {
-        return stateMachine.handleMessage(msg);
+        return stateMachine.handleMessage(msg) || gravityAttackStateMachine.handleMessage(msg);
     }
 
     public void startDuck() {
@@ -120,26 +126,41 @@ public class EnemyPlayer extends PActor implements IUpdated, Telegraph {
 
     public void attackBoss() {
         Logger.log(this, "Attacked Boss!");
+        attackStart = TimeUtils.nanoTime();
+    }
+
+    public boolean isAttacking() {
+        return GeneralUtils.secondsSince(attackStart) < Constants.SLICE_LENGTH;
     }
 
     public int distanceFromBoss() {
         return Math.abs((pos.x + size.x / 2) - (boss.pos.x + boss.size.x / 2)) - Constants.BOSS_WIDTH / 2;
     }
 
-    private int getRelativePositionFromBossMultiplier() {
+    public int getRelativePositionFromBossMultiplier() {
         return (int) Math.signum((pos.x + size.x / 2) - (boss.pos.x + boss.size.x / 2));
     }
 
+    public int getBestKnockbackMultiplier() {
+        return getRelativePositionFromBossMultiplier() * (isTouchingWalls() ? -1 : 1);
+    }
+
     public void knockBack() {
-        vel.x = 300 * getRelativePositionFromBossMultiplier();
+        vel.x = 100 * getBestKnockbackMultiplier();
         vel.y = 300;
         onGround = false;
     }
 
     public void takenHit() {
-        knockBack();
-        hitTime = TimeUtils.nanoTime();
-        gravitySwitched = false;
+        takenHit(false);
+    }
+
+    public void takenHit(boolean bypassInvincibility) {
+        if(hasRecoveredFromHit() || bypassInvincibility) {
+            knockBack();
+            hitTime = TimeUtils.nanoTime();
+            gravitySwitched = false;
+        }
     }
 
     public boolean hasRecoveredFromHit() {
@@ -155,49 +176,12 @@ public class EnemyPlayer extends PActor implements IUpdated, Telegraph {
     }
 
     public void startGravityAttack() {
-        gravitySwitched = true;
+        gravityAttackStateMachine.changeState(GravityAttackState.FLYING);
         vel.y = 0;
-        gravityAttackStage = GravityAttackStage.FLYING;
     }
 
     public void updateGravityAttack() {
-        if(gravityAttackStage == GravityAttackStage.FLYING) {
-            if(pos.y + size.y == Constants.GAME_HEIGHT - 1) {
-                gravityAttackStage = GravityAttackStage.RUNNING_TO_ENEMY;
-            }
-        }
-        else if(gravityAttackStage == GravityAttackStage.RUNNING_TO_ENEMY) {
-            vel.x = -getRelativePositionFromBossMultiplier() * 200;
-            if(Math.abs((pos.x + size.x / 2f) - (boss.pos.x + boss.size.x / 2f)) < 2) {
-                vel.x = 0;
-                vel.y = 0;
-                gravityAttackStage = GravityAttackStage.PLUNGING;
-                onGround = false;
-                plungeHit = false;
-            }
-        }
-        else if(gravityAttackStage == GravityAttackStage.PLUNGING) {
-            gravitySwitched = false;
-            if(GeneralUtils.rectanglesIntersect(pos, size, boss.pos, boss.size)) {
-                Logger.log(this, "Hit enemy with plunge!");
-                knockBack();
-                plungeHit = true;
-            }
-            if(pos.y + size.y > 400) {
-                onGround = false;
-            }
-            else if(onGround) {
-                Logger.log(this, "Ended attack!");
-                gravityAttackStage = GravityAttackStage.INACTIVE;
-                if(plungeHit) {
-                    stateMachine.changeState(EnemyPlayerState.RUN_AWAY);
-                } else {
-                    hitTime = TimeUtils.nanoTime();
-                    stateMachine.changeState(EnemyPlayerState.HIT);
-                    vel.set(0, 0);
-                }
-            }
-        }
+        gravityAttackStateMachine.update();
     }
 
     public void setGravitySwitched(boolean gravitySwitched) {
@@ -218,5 +202,38 @@ public class EnemyPlayer extends PActor implements IUpdated, Telegraph {
 
     public int getDirection() {
         return vel.x < 0 ? -1 : 1;
+    }
+
+    public boolean isOnGround() {
+        return onGround;
+    }
+
+    public StateMachine<EnemyPlayer, GravityAttackState> getGravityAttackStateMachine() {
+        return gravityAttackStateMachine;
+    }
+
+    public BossPlayer getBoss() {
+        return boss;
+    }
+
+    public void startHeadStuck() {
+        hitTime = TimeUtils.nanoTime();
+        headStuck = true;
+    }
+
+    public void setHeadStuck(boolean headStuck) {
+        this.headStuck = headStuck;
+    }
+
+    public boolean isHeadStuck() {
+        return gravityAttackStateMachine.getCurrentState() == GravityAttackState.INACTIVE && headStuck;
+    }
+
+    public long getDuckStartTime() {
+        return duckStart;
+    }
+
+    public long getAttackStartTime() {
+        return attackStart;
     }
 }
