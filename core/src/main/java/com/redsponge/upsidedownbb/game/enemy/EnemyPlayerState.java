@@ -24,11 +24,11 @@ public enum EnemyPlayerState implements State<EnemyPlayer> {
         @Override
         public boolean onMessage(EnemyPlayer entity, Telegram telegram) {
             switch (telegram.message) {
-                case MessageType.BOSS_PUNCH_BEGIN:
+                case MessageType.BOSS_PUNCH_BEGIN: {
                     if (entity.shouldDuck() && !entity.isDucking()) {
                         entity.getStateMachine().changeState(DUCK_DODGE);
                     }
-                    break;
+                } break;
             }
             return super.onMessage(entity, telegram);
         }
@@ -80,13 +80,6 @@ public enum EnemyPlayerState implements State<EnemyPlayer> {
             if(entity.hasRecoveredFromHit()) {
                 entity.getStateMachine().changeState(RUN_AWAY);
             }
-        }
-    },
-
-    IDLE() {
-        @Override
-        public void update(EnemyPlayer entity) {
-
         }
     },
 

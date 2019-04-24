@@ -30,6 +30,7 @@ public class BossPlayer extends PActor implements IUpdated, Telegraph {
 
     private PunchBox punchBox;
     private long punchStartTime;
+    private long gpStartTime;
 
     private EnemyPlayer enemyPlayer;
     private long dashStart;
@@ -39,7 +40,7 @@ public class BossPlayer extends PActor implements IUpdated, Telegraph {
         super(worldIn);
         input = new SimpleInputTranslator();
         size.set(Constants.BOSS_WIDTH, Constants.BOSS_HEIGHT);
-        pos.set((int) (Constants.GAME_WIDTH / 2 - size.x / 2), 100);
+        pos.set((int) (Constants.ARENA_WIDTH / 2 - size.x / 2), 100);
 
         vel = new Vector2(0, 0);
         dashStart = 0;
@@ -55,7 +56,7 @@ public class BossPlayer extends PActor implements IUpdated, Telegraph {
 
     @Override
     public void update(float delta) {
-        if(input.isJustPunching() && !isPunching()) {
+        if(input.isJustPunching() && !isPunching() && getPercentCooldownForPunch() >= 1) {
             beginPunch();
         }
         processPunch();
@@ -67,10 +68,10 @@ public class BossPlayer extends PActor implements IUpdated, Telegraph {
             if(GeneralUtils.secondsSince(dashStart) < 0.2f) {
                 vel.x *= 20;
             }
-            if(Gdx.input.isKeyJustPressed(Keys.SHIFT_LEFT)) {
+            if(Gdx.input.isKeyJustPressed(Keys.SHIFT_LEFT) && getPercentCooldownForDash() >= 1) {
                 dashStart = TimeUtils.nanoTime();
             }
-            if(onGround && input.isJustJumping() && !isGroundPounding()) {
+            if(onGround && input.isJustJumping() && !isGroundPounding() && getPercentCooldownForGroundPound() >= 1) {
                 beginGroundPound();
                 onGround = false;
             }
@@ -87,11 +88,20 @@ public class BossPlayer extends PActor implements IUpdated, Telegraph {
         onGround = collideFirst(pos.copy().add(0, -1)) instanceof Platform;
     }
 
+    public float getPercentCooldownForPunch() {
+        return GeneralUtils.secondsSince(punchStartTime) / Constants.PUNCH_COOLDOWN;
+    }
+
+    public float getPercentCooldownForGroundPound() {
+        return GeneralUtils.secondsSince(gpStartTime) / Constants.GROUND_POUND_COOLDOWN;
+    }
+
     public boolean isGroundPounding() {
         return groundPoundStateMachine.getCurrentState() != GroundPoundState.INACTIVE;
     }
 
     private void beginGroundPound() {
+        gpStartTime = TimeUtils.nanoTime();
         groundPoundStateMachine.changeState(GroundPoundState.RAISE);
     }
 
@@ -110,6 +120,10 @@ public class BossPlayer extends PActor implements IUpdated, Telegraph {
             punchBox.remove();
             punchBox = null;
         }
+    }
+
+    public float getPercentCooldownForDash() {
+        return GeneralUtils.secondsSince(dashStart) / Constants.DASH_COOLDOWN;
     }
 
     private void beginPunch() {

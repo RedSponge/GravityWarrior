@@ -20,11 +20,17 @@ public class AssetDescBin {
 
     public static final class Boss {
         public static final AssetDescriptor<Texture> idle = new AssetDescriptor<Texture>("textures/boss/idle.png", Texture.class);
+        public static final AssetDescriptor<TextureAtlas> powers = new AssetDescriptor<TextureAtlas>("textures/boss/powers.atlas", TextureAtlas.class);
     }
 
     public static final class Enemy {
         public static final AssetDescriptor<TextureAtlas> unpowered = new AssetDescriptor<TextureAtlas>("textures/enemy/unpowered.atlas", TextureAtlas.class);
         public static final AssetDescriptor<TextureAtlas> poweredOverlay = new AssetDescriptor<TextureAtlas>("textures/enemy/powered.atlas", TextureAtlas.class);
+    }
+
+    public static final class Background {
+        public static final AssetDescriptor<Texture> arena = new AssetDescriptor<Texture>("textures/background/arena.png", Texture.class);
+        public static final AssetDescriptor<Texture> sky = new AssetDescriptor<Texture>("textures/background/sky.png", Texture.class);
     }
 
 }

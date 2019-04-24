@@ -32,8 +32,8 @@ public class EnemyPlayerRenderer implements IRenderer {
         this.player = player;
         startTime = TimeUtils.nanoTime();
 
-        renderWidth = 64;
-        renderHeight = 96;
+        renderWidth = 64/2;
+        renderHeight = 96/2;
 
         initAnimation(assets);
     }
@@ -70,10 +70,10 @@ public class EnemyPlayerRenderer implements IRenderer {
             if(GeneralUtils.secondsSince(player.getDuckStartTime()) < .01f) {
                 startTime = TimeUtils.nanoTime();
             }
-        } else if(player.isTouchingWalls()) {
-            currentAnimation = "idle";
         } else if(gravityAttackState == GravityAttackState.PLUNGING) {
             currentAnimation = "plunging";
+        } else if(player.isTouchingWalls() || player.getVel().x == 0) {
+            currentAnimation = "idle";
         } else {
             currentAnimation = "run";
         }

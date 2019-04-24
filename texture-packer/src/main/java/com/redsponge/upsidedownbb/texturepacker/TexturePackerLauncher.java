@@ -7,5 +7,6 @@ public class TexturePackerLauncher {
     public static void main(String[] args) {
         TexturePacker.processIfModified("res/enemy/unpowered", "../assets/textures/enemy/", "unpowered");
         TexturePacker.processIfModified("res/enemy/powered", "../assets/textures/enemy/", "powered");
+        TexturePacker.processIfModified("res/powers", "../assets/textures/boss/", "powers");
     }
 }

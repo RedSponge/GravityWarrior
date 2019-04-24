@@ -5,9 +5,7 @@ import com.badlogic.gdx.ai.msg.Telegram;
 import com.badlogic.gdx.math.Interpolation;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.TimeUtils;
-import com.redsponge.upsidedownbb.utils.Constants;
 import com.redsponge.upsidedownbb.utils.GeneralUtils;
-import com.redsponge.upsidedownbb.utils.Logger;
 
 public enum GroundPoundState implements State<BossPlayer> {
     RAISE() {
@@ -24,7 +22,7 @@ public enum GroundPoundState implements State<BossPlayer> {
             this.wantedX = entity.getEnemyPlayer().pos.x - entity.size.x / 2;
             this.startX = entity.pos.x;
             this.vel = entity.getVel();
-            this.wantedY = 200;
+            this.wantedY = 150;
             this.startY = entity.pos.y;
             startTime = TimeUtils.nanoTime();
         }

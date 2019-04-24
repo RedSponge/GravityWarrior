@@ -33,7 +33,7 @@ public enum GravityAttackState implements State<EnemyPlayer> {
 
         @Override
         public void update(EnemyPlayer entity) {
-            if(entity.pos.y + entity.size.y == Constants.GAME_HEIGHT - 1) {
+            if(entity.pos.y + entity.size.y >= Constants.CEILLING_HEIGHT - 1) {
                 entity.getGravityAttackStateMachine().changeState(RUNNING);
             }
         }

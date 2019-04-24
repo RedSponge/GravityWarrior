@@ -7,18 +7,22 @@ public class Constants {
 
     public static final float WORLD_GRAVITY = -10;
 
-    public static final float GAME_WIDTH = 640;
-    public static final float GAME_HEIGHT = 480;
+    public static final float GAME_WIDTH = 720;
+    public static final float GAME_HEIGHT = 360;
 
+    public static final float ARENA_WIDTH = 960;
+    public static final float ARENA_HEIGHT = 360;
+    public static final int CEILLING_HEIGHT = 239;
     public static final int FLOOR_HEIGHT = 20;
-    public static final IntVector2 PUNCH_SIZE = new IntVector2(200, 100);
+
+    public static final IntVector2 PUNCH_SIZE = new IntVector2(100, 50);
 
     public static final float PUNCH_LENGTH = 0.1f;
-    public static final int BOSS_WIDTH = 200;
-    public static final int BOSS_HEIGHT = 200;
+    public static final int BOSS_WIDTH = 100;
+    public static final int BOSS_HEIGHT = 100;
 
-    public static final int PLAYER_WIDTH = 32;
-    public static final int PLAYER_HEIGHT = 64;
+    public static final int PLAYER_WIDTH = 16;
+    public static final int PLAYER_HEIGHT = 32;
 
     public static final float SLICE_LENGTH = 0.3f;
 
@@ -32,5 +36,12 @@ public class Constants {
             new AnimationDescriptor(7, "slice", SLICE_LENGTH / 7, PlayMode.LOOP),
             new AnimationDescriptor(2, "duck", 0.01f, PlayMode.NORMAL)
     };
-    public static final int PLAYER_DUCK_HEIGHT = 32;
+    public static final int PLAYER_DUCK_HEIGHT = 16;
+
+    public static final float GUI_WIDTH = 320;
+    public static final float GUI_HEIGHT = 240;
+
+    public static final float PUNCH_COOLDOWN = 2;
+    public static final float DASH_COOLDOWN = 1;
+    public static final float GROUND_POUND_COOLDOWN = 10;
 }

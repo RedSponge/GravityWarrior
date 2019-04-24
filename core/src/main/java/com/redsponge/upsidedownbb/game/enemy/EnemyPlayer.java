@@ -40,7 +40,7 @@ public class EnemyPlayer extends PActor implements IUpdated, Telegraph {
     public EnemyPlayer(PhysicsWorld worldIn, BossPlayer boss) {
         super(worldIn);
         this.boss = boss;
-        pos.set(200, 200);
+        pos.set(100, 100);
         size.set(Constants.PLAYER_WIDTH, Constants.PLAYER_HEIGHT);
         vel = new Vector2();
 
@@ -160,6 +160,8 @@ public class EnemyPlayer extends PActor implements IUpdated, Telegraph {
             knockBack();
             hitTime = TimeUtils.nanoTime();
             gravitySwitched = false;
+            headStuck = false;
+            gravityAttackStateMachine.changeState(GravityAttackState.INACTIVE);
         }
     }
 
@@ -168,7 +170,7 @@ public class EnemyPlayer extends PActor implements IUpdated, Telegraph {
     }
 
     public boolean isTouchingWalls() {
-        return pos.x == 1 || pos.x + size.x == Constants.GAME_WIDTH;
+        return pos.x == 1 || pos.x + size.x == Constants.ARENA_WIDTH - 1;
     }
 
     public boolean isDucking() {
