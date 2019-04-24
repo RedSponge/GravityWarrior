@@ -66,7 +66,7 @@ public class BossPlayer extends PActor implements IUpdated, Telegraph {
             vel.add(0, Constants.WORLD_GRAVITY);
             vel.x = direction * getSpeed();
             if(GeneralUtils.secondsSince(dashStart) < 0.2f) {
-                vel.x *= 20;
+                vel.x = direction * 400;
             }
             if(Gdx.input.isKeyJustPressed(Keys.SHIFT_LEFT) && getPercentCooldownForDash() >= 1) {
                 dashStart = TimeUtils.nanoTime();
@@ -105,14 +105,29 @@ public class BossPlayer extends PActor implements IUpdated, Telegraph {
         groundPoundStateMachine.changeState(GroundPoundState.RAISE);
     }
 
-    private boolean isPunching() {
-        return punchBox != null;
+    public boolean isPunching() {
+        return GeneralUtils.secondsSince(punchStartTime) < Constants.PUNCH_LENGTH;
     }
 
     private void processPunch() {
+        if(isPunching() && GeneralUtils.secondsSince(punchStartTime) > Constants.PUNCH_BOX_DELAY && punchBox == null) {
+            createPunchBox();
+        }
         if(GeneralUtils.secondsSince(punchStartTime) > Constants.PUNCH_LENGTH && punchBox != null) {
             endPunch();
         }
+    }
+
+    private void createPunchBox() {
+        punchBox = new PunchBox(worldIn);
+        int dir = getDirection();
+        int offsetX = dir == 1 ? size.x + 1 : -Constants.PUNCH_SIZE.x;
+        punchBox.pos.set(pos.copy().add(offsetX, Constants.PUNCH_SIZE.y / 2));
+        punchBox.size.set(Constants.PUNCH_SIZE.copy());
+
+        worldIn.addActor(punchBox);
+
+        MessageManager.getInstance().dispatchMessage(0, this, enemyPlayer, MessageType.BOSS_PUNCH_BEGIN);
     }
 
     private void endPunch() {
@@ -127,17 +142,7 @@ public class BossPlayer extends PActor implements IUpdated, Telegraph {
     }
 
     private void beginPunch() {
-        punchBox = new PunchBox(worldIn);
-
-        int dir = getDirection();
-        int offsetX = dir == 1 ? size.x + 1 : -Constants.PUNCH_SIZE.x;
-        punchBox.pos.set(pos.copy().add(offsetX, Constants.PUNCH_SIZE.y / 2));
-        punchBox.size.set(Constants.PUNCH_SIZE.copy());
-
-        worldIn.addActor(punchBox);
         punchStartTime = TimeUtils.nanoTime();
-
-        MessageManager.getInstance().dispatchMessage(0, this, enemyPlayer, MessageType.BOSS_PUNCH_BEGIN);
     }
 
     public int getDirection() {
@@ -145,10 +150,7 @@ public class BossPlayer extends PActor implements IUpdated, Telegraph {
     }
 
     private float getSpeed() {
-        if(onGround) {
-            return 30;
-        }
-        return 50;
+        return 80;
     }
 
     public void setDirection(int direction) {
@@ -157,11 +159,6 @@ public class BossPlayer extends PActor implements IUpdated, Telegraph {
 
     @Override
     public boolean handleMessage(Telegram msg) {
-        switch (msg.message) {
-            case MessageType.PLAYER_HIT:
-                endPunch();
-                break;
-        }
         return false;
     }
 
@@ -183,5 +180,9 @@ public class BossPlayer extends PActor implements IUpdated, Telegraph {
 
     public PunchBox getPunchBox() {
         return punchBox;
+    }
+
+    public long getPunchStartTime() {
+        return punchStartTime;
     }
 }

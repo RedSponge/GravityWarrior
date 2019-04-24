@@ -15,4 +15,14 @@ public class AnimationDescriptor {
         this.frameDuration = frameDuration;
         this.playMode = playMode;
     }
+
+    @Override
+    public String toString() {
+        return "AnimationDescriptor{" +
+                "numFrames=" + numFrames +
+                ", name='" + name + '\'' +
+                ", frameDuration=" + frameDuration +
+                ", playMode=" + playMode +
+                '}';
+    }
 }

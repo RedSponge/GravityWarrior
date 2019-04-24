@@ -19,7 +19,7 @@ public class AssetDescBin {
     }
 
     public static final class Boss {
-        public static final AssetDescriptor<Texture> idle = new AssetDescriptor<Texture>("textures/boss/idle.png", Texture.class);
+        public static final AssetDescriptor<TextureAtlas> frames = new AssetDescriptor<TextureAtlas>("textures/boss/frames.atlas", TextureAtlas.class);
         public static final AssetDescriptor<TextureAtlas> powers = new AssetDescriptor<TextureAtlas>("textures/boss/powers.atlas", TextureAtlas.class);
     }
 
