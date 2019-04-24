@@ -7,8 +7,13 @@ import com.badlogic.gdx.ai.fsm.StateMachine;
 import com.badlogic.gdx.ai.msg.MessageManager;
 import com.badlogic.gdx.ai.msg.Telegram;
 import com.badlogic.gdx.ai.msg.Telegraph;
+import com.badlogic.gdx.assets.AssetDescriptor;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.TimeUtils;
+import com.redsponge.upsidedownbb.assets.AssetDescBin;
+import com.redsponge.upsidedownbb.assets.AssetDescBin.Boss;
+import com.redsponge.upsidedownbb.assets.Assets;
 import com.redsponge.upsidedownbb.game.MessageType;
 import com.redsponge.upsidedownbb.game.Platform;
 import com.redsponge.upsidedownbb.game.enemy.EnemyPlayer;
@@ -21,6 +26,8 @@ import com.redsponge.upsidedownbb.utils.Constants;
 import com.redsponge.upsidedownbb.utils.GeneralUtils;
 
 public class BossPlayer extends PActor implements IUpdated, Telegraph {
+
+    public static final AssetDescriptor[] REQUIRED_ASSETS = {Boss.bite, Boss.gpFall, Boss.gpRise};
 
     private InputTranslator input;
     private boolean onGround;
@@ -36,7 +43,13 @@ public class BossPlayer extends PActor implements IUpdated, Telegraph {
     private long dashStart;
     private StateMachine<BossPlayer, GroundPoundState> groundPoundStateMachine;
 
-    public BossPlayer(PhysicsWorld worldIn) {
+
+    private Sound biteSound, gpRiseSound;
+    private Sound gpFallSound;
+
+    private BossPlayerRenderer renderer;
+
+    public BossPlayer(PhysicsWorld worldIn, Assets assets) {
         super(worldIn);
         input = new SimpleInputTranslator();
         size.set(Constants.BOSS_WIDTH, Constants.BOSS_HEIGHT);
@@ -48,6 +61,14 @@ public class BossPlayer extends PActor implements IUpdated, Telegraph {
 
         groundPoundStateMachine = new DefaultStateMachine<BossPlayer, GroundPoundState>(this, GroundPoundState.INACTIVE);
         groundPoundStateMachine.setGlobalState(GroundPoundState.GLOBAL);
+
+        biteSound = assets.get(Boss.bite);
+        gpRiseSound = assets.get(Boss.gpRise);
+        gpFallSound = assets.get(Boss.gpFall);
+    }
+
+    public void setRenderer(BossPlayerRenderer renderer) {
+        this.renderer = renderer;
     }
 
     public void setEnemyPlayer(EnemyPlayer enemyPlayer) {
@@ -103,6 +124,7 @@ public class BossPlayer extends PActor implements IUpdated, Telegraph {
     private void beginGroundPound() {
         gpStartTime = TimeUtils.nanoTime();
         groundPoundStateMachine.changeState(GroundPoundState.RAISE);
+        gpRiseSound.play();
     }
 
     public boolean isPunching() {
@@ -143,6 +165,7 @@ public class BossPlayer extends PActor implements IUpdated, Telegraph {
 
     private void beginPunch() {
         punchStartTime = TimeUtils.nanoTime();
+        biteSound.play();
     }
 
     public int getDirection() {
@@ -184,5 +207,13 @@ public class BossPlayer extends PActor implements IUpdated, Telegraph {
 
     public long getPunchStartTime() {
         return punchStartTime;
+    }
+
+    public Sound getGPFallSound() {
+        return gpFallSound;
+    }
+
+    public BossPlayerRenderer getRenderer() {
+        return renderer;
     }
 }

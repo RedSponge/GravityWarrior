@@ -1,5 +1,6 @@
 package com.redsponge.upsidedownbb.utils;
 
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
@@ -7,8 +8,11 @@ import com.badlogic.gdx.utils.TimeUtils;
 import com.redsponge.upsidedownbb.assets.AnimationDescriptor;
 
 import java.lang.reflect.Array;
+import java.util.Random;
 
 public class GeneralUtils {
+
+    private static final Random random = new Random();
 
     public static float secondsSince(long time) {
         return (TimeUtils.nanoTime() - time) / 1000000000f;
@@ -58,5 +62,13 @@ public class GeneralUtils {
 
     public static Animation<TextureRegion> getAnimation(AnimationDescriptor descriptor, TextureAtlas atlas, int startsAt) {
         return new Animation<TextureRegion>(descriptor.frameDuration, queryAnimationFrames(atlas, descriptor.numFrames, descriptor.name, startsAt), descriptor.playMode);
+    }
+
+    public static void playSoundRandomlyPitched(Sound sound) {
+        playSoundRandomlyPitched(sound, 0.5f);
+    }
+
+    public static void playSoundRandomlyPitched(Sound sound, float vol) {
+        sound.play(vol, 0.5f + random.nextFloat(), 0);
     }
 }

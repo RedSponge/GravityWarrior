@@ -61,6 +61,7 @@ public enum GroundPoundState implements State<BossPlayer> {
         public void enter(BossPlayer entity) {
             vel = entity.getVel();
             vel.y = 0;
+            entity.getGPFallSound().play();
         }
 
         @Override
@@ -75,6 +76,7 @@ public enum GroundPoundState implements State<BossPlayer> {
 
             if(entity.isOnGround()) {
                 entity.getGroundPoundStateMachine().changeState(INACTIVE);
+                entity.getRenderer().startGPDust();
             }
         }
     },

@@ -7,8 +7,14 @@ import com.badlogic.gdx.ai.fsm.StateMachine;
 import com.badlogic.gdx.ai.msg.MessageManager;
 import com.badlogic.gdx.ai.msg.Telegram;
 import com.badlogic.gdx.ai.msg.Telegraph;
+import com.badlogic.gdx.assets.AssetDescriptor;
+import com.badlogic.gdx.audio.Sound;
+import com.badlogic.gdx.graphics.g2d.ParticleEffect;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.TimeUtils;
+import com.redsponge.upsidedownbb.assets.AssetDescBin.Enemy;
+import com.redsponge.upsidedownbb.assets.AssetDescBin.Particles;
+import com.redsponge.upsidedownbb.assets.Assets;
 import com.redsponge.upsidedownbb.game.MessageType;
 import com.redsponge.upsidedownbb.game.Platform;
 import com.redsponge.upsidedownbb.game.boss.BossPlayer;
@@ -21,6 +27,8 @@ import com.redsponge.upsidedownbb.utils.Logger;
 
 public class EnemyPlayer extends PActor implements IUpdated, Telegraph {
 
+    public static final AssetDescriptor[] REQUIRED_ASSETS = {Enemy.attack};
+
     private boolean gravitySwitched;
     private Vector2 vel;
     private BossPlayer boss;
@@ -31,10 +39,10 @@ public class EnemyPlayer extends PActor implements IUpdated, Telegraph {
     private StateMachine<EnemyPlayer, GravityAttackState> gravityAttackStateMachine;
     private long hitTime;
     private boolean onGround;
-
     private boolean headStuck;
+    private Sound attackSound;
 
-    public EnemyPlayer(PhysicsWorld worldIn, BossPlayer boss) {
+    public EnemyPlayer(PhysicsWorld worldIn, BossPlayer boss, Assets assets) {
         super(worldIn);
         this.boss = boss;
         pos.set(100, 100);
@@ -45,6 +53,8 @@ public class EnemyPlayer extends PActor implements IUpdated, Telegraph {
         stateMachine.setGlobalState(EnemyPlayerState.GLOBAL_STATE);
 
         gravityAttackStateMachine = new DefaultStateMachine<EnemyPlayer, GravityAttackState>(this, GravityAttackState.INACTIVE);
+
+        attackSound = assets.get(Enemy.attack);
     }
 
     @Override
@@ -64,9 +74,8 @@ public class EnemyPlayer extends PActor implements IUpdated, Telegraph {
         moveY(vel.y * delta, null);
         moveX(vel.x * delta, () -> {if(!hasRecoveredFromHit()) {vel.x *= -1;}});
 
-        onGround = false;
-        if(collideFirst(pos.copy().add(0, -1)) instanceof Platform) { onGround = true;}
-        if(collideFirst(pos.copy().add(0, size.y + 1)) instanceof Platform) {onGround = true;}
+        onGround = collideFirst(pos.copy().add(0, -1)) instanceof Platform
+        || collideFirst(pos.copy().add(0, size.y + 1)) instanceof Platform;
 
         if(boss.getPunchBox() != null) {
             if(GeneralUtils.rectanglesIntersect(pos, size, boss.getPunchBox().pos, boss.getPunchBox().size)) {
@@ -102,6 +111,10 @@ public class EnemyPlayer extends PActor implements IUpdated, Telegraph {
         stateMachine.changeState(EnemyPlayerState.RUN_AWAY);
     }
 
+    public boolean isRunning() {
+        return vel.x != 0 && !isTouchingWalls();
+    }
+
     public boolean shouldDuck() {
         if(!onGround) return false;
         return boss.getDirection() == getRelativePositionFromBossMultiplier() && distanceFromBoss() < 200;
@@ -124,6 +137,7 @@ public class EnemyPlayer extends PActor implements IUpdated, Telegraph {
     public void attackBoss() {
         Logger.log(this, "Attacked Boss!");
         attackStart = TimeUtils.nanoTime();
+        attackSound.play();
     }
 
     public boolean isAttacking() {

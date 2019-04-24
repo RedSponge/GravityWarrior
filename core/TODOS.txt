@@ -1,10 +1,19 @@
-Boss Player:
-    - Roar Move
-    - Actual Sprites
-    - Roll Move
-
 Player:
-    - Create actor
-    - Create renderer
-    - Add gravity switching
-    - Research and work on AI
+ - Detect if hit boss with sword by y and not only by x
+
+Boss:
+ - GP sprites maybe
+
+General:
+ - See where can add more particles
+ - See where can add more sounds
+ - Finish math homework already
+ - Menu Screen
+ - Pause Screen
+ - ** Actual Options Menu! **
+   - Keybinds
+   - Volume
+   - Accessible from pause
+ - Tutorial Text
+
+ - VERY IFFY: MAYBE ADD A SMALL PLATFORMING SECTION TO INTRODUCE THE CHARACTER

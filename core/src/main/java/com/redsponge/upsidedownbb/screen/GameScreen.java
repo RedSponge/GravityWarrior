@@ -5,19 +5,21 @@ import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.ai.GdxAI;
 import com.badlogic.gdx.ai.msg.MessageManager;
 import com.badlogic.gdx.assets.AssetDescriptor;
+import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.ParticleEffect;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.viewport.FitViewport;
-import com.redsponge.upsidedownbb.assets.AssetDescBin;
 import com.redsponge.upsidedownbb.assets.AssetDescBin.Background;
 import com.redsponge.upsidedownbb.assets.AssetDescBin.Boss;
+import com.redsponge.upsidedownbb.assets.AssetDescBin.Particles;
 import com.redsponge.upsidedownbb.game.Platform;
 import com.redsponge.upsidedownbb.game.boss.BossPlayer;
 import com.redsponge.upsidedownbb.game.boss.BossPlayerRenderer;
@@ -48,6 +50,9 @@ public class GameScreen extends AbstractScreen implements InputProcessor {
 
     private TextureRegion bossDash, bossGP, bossPunch;
 
+    private Music backgroundMusic;
+
+    private ParticleEffect dust;
 
     public GameScreen(GameAccessor ga) {
         super(ga);
@@ -61,7 +66,7 @@ public class GameScreen extends AbstractScreen implements InputProcessor {
         gameViewport = new FitViewport(Constants.GAME_WIDTH, Constants.GAME_HEIGHT);
 
         world = new PhysicsWorld();
-        boss = new BossPlayer(world);
+        boss = new BossPlayer(world, assets);
 
         floor = new Platform(world);
 
@@ -88,7 +93,7 @@ public class GameScreen extends AbstractScreen implements InputProcessor {
         world.addSolid(lWall);
         world.addSolid(ceiling);
 
-        EnemyPlayer enemyPlayer = new EnemyPlayer(world, boss);
+        EnemyPlayer enemyPlayer = new EnemyPlayer(world, boss, assets);
         boss.setEnemyPlayer(enemyPlayer);
         world.addActor(enemyPlayer);
 
@@ -104,6 +109,12 @@ public class GameScreen extends AbstractScreen implements InputProcessor {
 
         arenaBackground = assets.get(Background.arena);
         sky = assets.get(Background.sky);
+
+        backgroundMusic = Gdx.audio.newMusic(Gdx.files.internal("music/fight_with_a_cube.wav"));
+        backgroundMusic.setLooping(true);
+        backgroundMusic.play();
+
+        boss.setRenderer(bossRenderer);
     }
 
     @Override
@@ -128,6 +139,8 @@ public class GameScreen extends AbstractScreen implements InputProcessor {
         if(camPos.y < gameViewport.getWorldHeight() * zoom / 2) camPos.y = gameViewport.getWorldHeight() * zoom / 2;
         if(camPos.x > Constants.ARENA_WIDTH - gameViewport.getWorldWidth() * zoom / 2) camPos.x = Constants.ARENA_WIDTH - gameViewport.getWorldWidth() * zoom / 2;
 
+
+
         gameViewport.apply();
         batch.setProjectionMatrix(gameViewport.getCamera().combined);
 
@@ -138,7 +151,6 @@ public class GameScreen extends AbstractScreen implements InputProcessor {
 
         batch.draw(arenaBackground, 0, 0);
         batch.end();
-        pdr.render(world, gameViewport.getCamera().combined);
 
         guiViewport.apply();
         batch.setProjectionMatrix(guiViewport.getCamera().combined);
@@ -178,6 +190,7 @@ public class GameScreen extends AbstractScreen implements InputProcessor {
     @Override
     public void dispose() {
         pdr.dispose();
+        backgroundMusic.dispose();
     }
 
     @Override
@@ -188,8 +201,9 @@ public class GameScreen extends AbstractScreen implements InputProcessor {
 
     @Override
     public AssetDescriptor[] getRequiredAssets() {
-        return GeneralUtils.joinArrays(AssetDescriptor.class, BossPlayerRenderer.REQUIRED_ASSETS,
-                EnemyPlayerRenderer.REQUIRED_ASSETS, new AssetDescriptor[] {Boss.powers, Background.arena, Background.sky});
+        return GeneralUtils.joinArrays(AssetDescriptor.class, EnemyPlayer.REQUIRED_ASSETS, BossPlayerRenderer.REQUIRED_ASSETS,
+                BossPlayer.REQUIRED_ASSETS, EnemyPlayerRenderer.REQUIRED_ASSETS, new AssetDescriptor[] {
+                        Particles.dust, Particles.groundPoundDust, Boss.powers, Background.arena, Background.sky});
     }
 
 

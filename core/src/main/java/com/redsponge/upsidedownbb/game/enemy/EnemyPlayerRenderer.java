@@ -1,8 +1,9 @@
 package com.redsponge.upsidedownbb.game.enemy;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.assets.AssetDescriptor;
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Animation;
+import com.badlogic.gdx.graphics.g2d.ParticleEffect;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
@@ -10,6 +11,7 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.utils.TimeUtils;
 import com.redsponge.upsidedownbb.assets.AnimationDescriptor;
 import com.redsponge.upsidedownbb.assets.AssetDescBin.Enemy;
+import com.redsponge.upsidedownbb.assets.AssetDescBin.Particles;
 import com.redsponge.upsidedownbb.assets.Assets;
 import com.redsponge.upsidedownbb.assets.IRenderer;
 import com.redsponge.upsidedownbb.utils.Constants;
@@ -21,6 +23,7 @@ import java.util.HashMap;
 public class EnemyPlayerRenderer implements IRenderer {
 
     public static final AssetDescriptor[] REQUIRED_ASSETS = {Enemy.unpowered, Enemy.poweredOverlay};
+    private ParticleEffect dustEffect;
     private EnemyPlayer player;
     private int renderWidth, renderHeight;
 
@@ -36,6 +39,7 @@ public class EnemyPlayerRenderer implements IRenderer {
         renderHeight = 96/2;
 
         initAnimation(assets);
+        dustEffect = assets.get(Particles.dust);
     }
 
     private void initAnimation(Assets assets) {
@@ -86,6 +90,7 @@ public class EnemyPlayerRenderer implements IRenderer {
 
         int w = renderWidth;
         int h = renderHeight;
+
         if(player.getDirection() == -1 && !flip || player.getDirection() == 1 && flip) {
             x += w;
             w *= -1;
@@ -94,6 +99,12 @@ public class EnemyPlayerRenderer implements IRenderer {
             y += player.size.y;
             h *= -1;
         }
+
+        if(player.isOnGround() && player.isRunning()) {
+            dustEffect.setPosition(x, y);
+            dustEffect.draw(batch, Gdx.graphics.getDeltaTime());
+        }
+
         Pair<Animation<TextureRegion>, Animation<TextureRegion>> animationPair = animations.get(currentAnimation);
         batch.draw(animationPair.a.getKeyFrame(GeneralUtils.secondsSince(startTime)), x, y, w, h);
         if(player.isPowered()) {
