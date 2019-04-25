@@ -26,6 +26,9 @@ public class TransitionManager {
     private boolean switched;
     private boolean transitioning;
 
+    private boolean shouldProcessExit;
+    private float timeCounter;
+
     private EngineGame game;
 
     public TransitionManager(EngineGame game, ShapeRenderer shapeRenderer) {
@@ -34,13 +37,19 @@ public class TransitionManager {
     }
 
     public void render(float delta) {
-        float timeSince = GeneralUtils.secondsSince(transitionBegin);
+        if(!switched || shouldProcessExit) {
+            timeCounter += delta;
+        }
+        Logger.log(this, delta);
+
+        float timeSince = timeCounter;
 
 
         if(timeSince > length / 2 && !switched) {
             Logger.log(this, "Transition Switched!!");
             game.setScreen(pendingScreen);
             switched = true;
+            shouldProcessExit = true;
 
             Gdx.gl.glClearColor(0, 0, 0, 1);
             Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
@@ -58,6 +67,10 @@ public class TransitionManager {
         }
     }
 
+    public void beginExit() {
+        shouldProcessExit = true;
+    }
+
     public void startTransition(AbstractScreen next, Transition transition, float length, Interpolation interFrom, Interpolation interTo) {
         this.pendingScreen = next;
         this.transition = transition;
@@ -67,6 +80,8 @@ public class TransitionManager {
         this.transitioning = true;
         this.interFrom = interFrom;
         this.interTo = interTo;
+        this.shouldProcessExit = false;
+        this.timeCounter = 0;
     }
 
     public void resize(int width, int height) {

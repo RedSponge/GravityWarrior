@@ -45,7 +45,7 @@ public class SplashScreenScreen extends AbstractScreen {
         splashScreenRenderer.render();
 
         if((splashScreenRenderer.isComplete() || skipped) && !transitioning) {
-            ga.transitionTo(new GameScreen(ga), TransitionTemplates.linearDissolve(batch, 1));
+            ga.transitionTo(new MenuScreen(ga), TransitionTemplates.sineSlide(1));
         }
     }
 

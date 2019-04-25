@@ -1,7 +1,6 @@
 package com.redsponge.upsidedownbb.game.boss;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.ai.fsm.DefaultStateMachine;
 import com.badlogic.gdx.ai.fsm.StateMachine;
 import com.badlogic.gdx.ai.msg.MessageManager;
@@ -24,6 +23,7 @@ import com.redsponge.upsidedownbb.physics.PhysicsWorld;
 import com.redsponge.upsidedownbb.screen.GameScreen;
 import com.redsponge.upsidedownbb.utils.Constants;
 import com.redsponge.upsidedownbb.utils.GeneralUtils;
+import com.redsponge.upsidedownbb.utils.Settings;
 
 public class BossPlayer extends PActor implements IUpdated, Telegraph {
 
@@ -101,7 +101,7 @@ public class BossPlayer extends PActor implements IUpdated, Telegraph {
                 if (GeneralUtils.secondsSince(dashStart) < 0.2f) {
                     vel.x = direction * 400;
                 }
-                if (Gdx.input.isKeyJustPressed(Keys.SHIFT_LEFT) && getPercentCooldownForDash() >= 1) {
+                if (input.isJustDashing() && getPercentCooldownForDash() >= 1) {
                     dashStart = TimeUtils.nanoTime();
                 }
                 if (onGround && input.isJustJumping() && !isGroundPounding() && getPercentCooldownForGroundPound() >= 1) {

@@ -330,7 +330,7 @@ public class GameScreen extends AbstractScreen implements InputProcessor {
     @Override
     public boolean keyDown(int keycode) {
         if(gameFinished) {
-            ga.transitionTo(new SplashScreenScreen(ga), TransitionTemplates.linearFade(1));
+            ga.transitionTo(new MenuScreen(ga), TransitionTemplates.sineSlide(1));
         }
         return false;
     }

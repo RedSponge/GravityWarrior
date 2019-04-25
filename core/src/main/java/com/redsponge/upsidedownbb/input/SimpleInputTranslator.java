@@ -2,6 +2,7 @@ package com.redsponge.upsidedownbb.input;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
+import com.redsponge.upsidedownbb.utils.Settings;
 
 /**
  * An example of an {@link InputTranslator}
@@ -26,16 +27,21 @@ public class SimpleInputTranslator implements InputTranslator {
 
     @Override
     public boolean isJumping() {
-        return Gdx.input.isKeyPressed(Keys.SPACE);
+        return Gdx.input.isKeyPressed(Settings.keyGroundPound);
     }
 
     @Override
     public boolean isJustJumping() {
-        return Gdx.input.isKeyJustPressed(Keys.SPACE);
+        return Gdx.input.isKeyJustPressed(Settings.keyGroundPound);
     }
 
     @Override
     public boolean isJustPunching() {
-        return Gdx.input.isKeyJustPressed(Keys.Z);
+        return Gdx.input.isKeyJustPressed(Settings.keyPunch);
+    }
+
+    @Override
+    public boolean isJustDashing() {
+        return Gdx.input.isKeyJustPressed(Settings.keyDash);
     }
 }
