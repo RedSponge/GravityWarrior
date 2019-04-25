@@ -49,7 +49,7 @@ public enum GravityAttackState implements State<EnemyPlayer> {
 
         @Override
         public void update(EnemyPlayer entity) {
-            vel.x =- entity.getRelativePositionFromBossMultiplier() * 200;
+            vel.x =- entity.getRelativePositionFromBossMultiplier() * 400;
             if(Math.abs((entity.pos.x + entity.size.x /2f)-(entity.getBoss().pos.x + entity.getBoss().size.x /2f)) < 2){
                 vel.x = 0;
                 vel.y = 0;
@@ -74,6 +74,7 @@ public enum GravityAttackState implements State<EnemyPlayer> {
                 hit = true;
                 entity.knockBack();
                 Logger.log(this, "Hit Enemy With Plunge!");
+                entity.getBoss().attacked(Constants.PLUNGE_ATTACK_DAMAGE);
             }
 
             if(entity.pos.y < 300) {

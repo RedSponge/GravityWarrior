@@ -9,5 +9,6 @@ public class TexturePackerLauncher {
         TexturePacker.processIfModified("res/enemy/powered", "../assets/textures/enemy/", "powered");
         TexturePacker.processIfModified("res/powers", "../assets/textures/boss/", "powers");
         TexturePacker.processIfModified("res/boss", "../assets/textures/boss/", "frames");
+        TexturePacker.processIfModified("res/bar", "../assets/textures/bar/", "bar");
     }
 }

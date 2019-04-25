@@ -16,6 +16,10 @@ public class AssetDescBin {
         public static final AssetDescriptor<TextureAtlas> atlas = new AssetDescriptor<TextureAtlas>("splashscreen/splashscreen.atlas", TextureAtlas.class);
     }
 
+    public static final class General {
+        public static final AssetDescriptor<TextureAtlas> bar = new AssetDescriptor<TextureAtlas>("textures/bar/bar.atlas", TextureAtlas.class);
+    }
+
     public static final class Fonts {
         public static final AssetDescriptor<BitmapFont> pixelmix = new AssetDescriptor<BitmapFont>("fonts/pixelmix.fnt", BitmapFont.class);
     }
@@ -27,6 +31,7 @@ public class AssetDescBin {
         public static final AssetDescriptor<Sound> bite = new AssetDescriptor<Sound>("sounds/boss_bite.wav", Sound.class);
         public static final AssetDescriptor<Sound> gpRise = new AssetDescriptor<Sound>("sounds/boss_gp_rise.wav", Sound.class);
         public static final AssetDescriptor<Sound> gpFall = new AssetDescriptor<Sound>("sounds/boss_gp_fall.wav", Sound.class);
+        public static final AssetDescriptor<Sound> hit = new AssetDescriptor<Sound>("sounds/boss_hit.wav", Sound.class);
     }
 
     public static final class Enemy {

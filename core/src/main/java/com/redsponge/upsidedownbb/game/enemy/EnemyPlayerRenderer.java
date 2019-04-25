@@ -2,6 +2,7 @@ package com.redsponge.upsidedownbb.game.enemy;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.assets.AssetDescriptor;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.ParticleEffect;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -16,6 +17,7 @@ import com.redsponge.upsidedownbb.assets.Assets;
 import com.redsponge.upsidedownbb.assets.IRenderer;
 import com.redsponge.upsidedownbb.utils.Constants;
 import com.redsponge.upsidedownbb.utils.GeneralUtils;
+import com.redsponge.upsidedownbb.utils.Logger;
 import com.redsponge.upsidedownbb.utils.holders.Pair;
 
 import java.util.HashMap;
@@ -30,6 +32,8 @@ public class EnemyPlayerRenderer implements IRenderer {
     private HashMap<String, Pair<Animation<TextureRegion>, Animation<TextureRegion>>> animations;
 
     private long startTime;
+    private long dabStartTime;
+    private boolean dabFlip;
 
     public EnemyPlayerRenderer(EnemyPlayer player, Assets assets) {
         this.player = player;
@@ -40,6 +44,8 @@ public class EnemyPlayerRenderer implements IRenderer {
 
         initAnimation(assets);
         dustEffect = assets.get(Particles.dust);
+        dabStartTime = 0;
+        dabFlip = false;
     }
 
     private void initAnimation(Assets assets) {
@@ -60,7 +66,18 @@ public class EnemyPlayerRenderer implements IRenderer {
         boolean flip = false;
         GravityAttackState gravityAttackState = player.getGravityAttackStateMachine().getCurrentState();
 
-        if(player.isHeadStuck()) {
+        if(player.getHealth() <= 0) {
+            currentAnimation = "fallen";
+        } else if(player.getBoss().getHealth() <= 0) {
+            if(dabStartTime == 0 || GeneralUtils.secondsSince(dabStartTime) > animations.get("dab").a.getAnimationDuration()) {
+                Logger.log(this, animations.get("dab").a.getAnimationDuration());
+                dabStartTime = TimeUtils.nanoTime();
+                startTime = dabStartTime;
+                dabFlip = !dabFlip;
+            }
+            flip = dabFlip;
+            currentAnimation = "dab";
+        } else if(player.isHeadStuck()) {
             currentAnimation = "head_stuck";
         } else if(!player.hasRecoveredFromHit()) {
             currentAnimation = "hit";
@@ -100,16 +117,23 @@ public class EnemyPlayerRenderer implements IRenderer {
             h *= -1;
         }
 
+        float alpha = 1;
+        if(!player.hasRecoveredFromHit()) {
+            alpha = .5f;
+        }
+
         if(player.isOnGround() && player.isRunning()) {
             dustEffect.setPosition(x, y);
             dustEffect.draw(batch, Gdx.graphics.getDeltaTime());
         }
 
+        batch.setColor(new Color(1, 1, 1, alpha));
         Pair<Animation<TextureRegion>, Animation<TextureRegion>> animationPair = animations.get(currentAnimation);
         batch.draw(animationPair.a.getKeyFrame(GeneralUtils.secondsSince(startTime)), x, y, w, h);
         if(player.isPowered()) {
             batch.draw(animationPair.b.getKeyFrame(GeneralUtils.secondsSince(startTime)), x, y, w, h);
         }
+        batch.setColor(Color.WHITE);
     }
 
     @Override

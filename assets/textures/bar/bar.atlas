@@ -1,0 +1,20 @@
+
+bar.png
+size: 64,16
+format: RGBA8888
+filter: Nearest,Nearest
+repeat: none
+inside
+  rotate: false
+  xy: 2, 2
+  size: 16, 10
+  orig: 16, 10
+  offset: 0, 0
+  index: -1
+outline
+  rotate: false
+  xy: 20, 2
+  size: 16, 10
+  orig: 16, 10
+  offset: 0, 0
+  index: -1

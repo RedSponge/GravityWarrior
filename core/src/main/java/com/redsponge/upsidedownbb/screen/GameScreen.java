@@ -10,27 +10,35 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.ParticleEffect;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.GlyphLayout;
+import com.badlogic.gdx.graphics.g2d.NinePatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.utils.TimeUtils;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.redsponge.upsidedownbb.assets.AssetDescBin.Background;
 import com.redsponge.upsidedownbb.assets.AssetDescBin.Boss;
+import com.redsponge.upsidedownbb.assets.AssetDescBin.Fonts;
+import com.redsponge.upsidedownbb.assets.AssetDescBin.General;
 import com.redsponge.upsidedownbb.assets.AssetDescBin.Particles;
 import com.redsponge.upsidedownbb.game.Platform;
 import com.redsponge.upsidedownbb.game.boss.BossPlayer;
 import com.redsponge.upsidedownbb.game.boss.BossPlayerRenderer;
 import com.redsponge.upsidedownbb.game.enemy.EnemyPlayer;
 import com.redsponge.upsidedownbb.game.enemy.EnemyPlayerRenderer;
+import com.redsponge.upsidedownbb.physics.PEntity;
 import com.redsponge.upsidedownbb.physics.PSolid;
 import com.redsponge.upsidedownbb.physics.PhysicsDebugRenderer;
 import com.redsponge.upsidedownbb.physics.PhysicsWorld;
+import com.redsponge.upsidedownbb.transitions.TransitionTemplates;
 import com.redsponge.upsidedownbb.utils.Constants;
 import com.redsponge.upsidedownbb.utils.GameAccessor;
 import com.redsponge.upsidedownbb.utils.GeneralUtils;
+import com.redsponge.upsidedownbb.utils.Logger;
 
 public class GameScreen extends AbstractScreen implements InputProcessor {
 
@@ -39,6 +47,7 @@ public class GameScreen extends AbstractScreen implements InputProcessor {
 
     private PhysicsWorld world;
     private BossPlayer boss;
+
     private PSolid floor;
     private PhysicsDebugRenderer pdr;
 
@@ -49,10 +58,14 @@ public class GameScreen extends AbstractScreen implements InputProcessor {
     private FitViewport guiViewport;
 
     private TextureRegion bossDash, bossGP, bossPunch;
+    private NinePatch barOutline, barInside;
 
     private Music backgroundMusic;
 
-    private ParticleEffect dust;
+    private EnemyPlayer enemyPlayer;
+
+    private BitmapFont font;
+    private long gameFinishTime;
 
     public GameScreen(GameAccessor ga) {
         super(ga);
@@ -66,7 +79,7 @@ public class GameScreen extends AbstractScreen implements InputProcessor {
         gameViewport = new FitViewport(Constants.GAME_WIDTH, Constants.GAME_HEIGHT);
 
         world = new PhysicsWorld();
-        boss = new BossPlayer(world, assets);
+        boss = new BossPlayer(world, this, assets);
 
         floor = new Platform(world);
 
@@ -93,7 +106,7 @@ public class GameScreen extends AbstractScreen implements InputProcessor {
         world.addSolid(lWall);
         world.addSolid(ceiling);
 
-        EnemyPlayer enemyPlayer = new EnemyPlayer(world, boss, assets);
+        enemyPlayer = new EnemyPlayer(world, boss, assets, this);
         boss.setEnemyPlayer(enemyPlayer);
         world.addActor(enemyPlayer);
 
@@ -112,16 +125,42 @@ public class GameScreen extends AbstractScreen implements InputProcessor {
 
         backgroundMusic = Gdx.audio.newMusic(Gdx.files.internal("music/fight_with_a_cube.wav"));
         backgroundMusic.setLooping(true);
+        backgroundMusic.setVolume(0.5f);
         backgroundMusic.play();
 
+        TextureAtlas bar = assets.get(General.bar);
+        barInside = new NinePatch(bar.findRegion("inside"), 2, 2, 1, 1);
+        barOutline = new NinePatch(bar.findRegion("outline"), 2, 2, 1, 1);
+
         boss.setRenderer(bossRenderer);
+
+        font = assets.get(Fonts.pixelmix);
     }
+
+    private boolean gameFinished;
 
     @Override
     public void tick(float delta) {
+        if((boss.getHealth() <= 0 || enemyPlayer.getHealth() <= 0) && !gameFinished) {
+            gameFinished = true;
+            backgroundMusic.stop();
+            backgroundMusic.dispose();
+            gameFinishTime = TimeUtils.nanoTime();
+            return;
+        }
+
         GdxAI.getTimepiece().update(delta);
         MessageManager.getInstance().update();
         world.update(delta);
+    }
+
+    public boolean isGameFinished() {
+        return gameFinished;
+    }
+
+    @Override
+    public void hide() {
+        Gdx.input.setInputProcessor(null);
     }
 
     @Override
@@ -132,12 +171,22 @@ public class GameScreen extends AbstractScreen implements InputProcessor {
 
         Vector3 camPos = gameViewport.getCamera().position;
         float zoom = 0.8f;
-        ((OrthographicCamera) gameViewport.getCamera()).zoom = zoom;
-        camPos.lerp(new Vector3(boss.pos.x, boss.pos.y, 0), 0.1f);
+        if(!gameFinished) {
+            ((OrthographicCamera) gameViewport.getCamera()).zoom = zoom;
+            camPos.lerp(new Vector3(boss.pos.x, boss.pos.y, 0), 0.1f);
+        } else {
+            zoom = 0.5f;
+            PEntity target = boss.getHealth() <= 0 ? boss : enemyPlayer;
+            camPos.lerp(new Vector3(target.pos.x, target.pos.y, 0), 0.1f);
+            ((OrthographicCamera) gameViewport.getCamera()).zoom = GeneralUtils.lerp(((OrthographicCamera) gameViewport.getCamera()).zoom, zoom, 0.1f);
 
-        if(camPos.x < gameViewport.getWorldWidth() * zoom / 2) camPos.x = gameViewport.getWorldWidth() * zoom / 2;
-        if(camPos.y < gameViewport.getWorldHeight() * zoom / 2) camPos.y = gameViewport.getWorldHeight() * zoom / 2;
-        if(camPos.x > Constants.ARENA_WIDTH - gameViewport.getWorldWidth() * zoom / 2) camPos.x = Constants.ARENA_WIDTH - gameViewport.getWorldWidth() * zoom / 2;
+        }
+
+        if (camPos.x < gameViewport.getWorldWidth() * zoom / 2) camPos.x = gameViewport.getWorldWidth() * zoom / 2;
+        if (camPos.y < gameViewport.getWorldHeight() * zoom / 2)
+            camPos.y = gameViewport.getWorldHeight() * zoom / 2;
+        if (camPos.x > Constants.ARENA_WIDTH - gameViewport.getWorldWidth() * zoom / 2)
+            camPos.x = Constants.ARENA_WIDTH - gameViewport.getWorldWidth() * zoom / 2;
 
 
 
@@ -159,7 +208,17 @@ public class GameScreen extends AbstractScreen implements InputProcessor {
     }
 
     private void drawGUI() {
+
+        final int alphaMult;
+        if(gameFinished) {
+            alphaMult = (int) Math.max((1 - GeneralUtils.secondsSince(gameFinishTime) / 2) * 255, 0);
+        } else {
+            alphaMult = 255;
+        }
+
         batch.begin();
+        batch.setColor(new Color(1, 1, 1, alphaMult / 255f));
+
         TextureRegion[] powers = {bossPunch, bossDash, bossGP};
         float[] percents = {boss.getPercentCooldownForPunch(), boss.getPercentCooldownForDash(), boss.getPercentCooldownForGroundPound()};
         int powerSpacing = 6;
@@ -168,23 +227,84 @@ public class GameScreen extends AbstractScreen implements InputProcessor {
             TextureRegion power = powers[i];
             batch.draw(power, powerStartMargin + i * (power.getRegionWidth() + powerSpacing), 200);
         }
+
+        int barDistFromWalls = 20;
+        int barY = 150;
+        int barHeight = 20;
+        int barWidth = 100;
+
+        barOutline.draw(batch, barDistFromWalls, barY, barWidth, barHeight);
+        barOutline.draw(batch, guiViewport.getWorldWidth() - barDistFromWalls - barWidth, barY, barWidth, barHeight);
+
+
+        batch.setColor(new Color(Constants.BOSS_BAR_COLOR + alphaMult));
+        barInside.draw(batch, barDistFromWalls, barY, barWidth * boss.getHealth() / Constants.BOSS_MAX_HEALTH, barHeight);
+        batch.setColor(new Color(Constants.PLAYER_BAR_COLOR + alphaMult));
+        barInside.draw(batch, guiViewport.getWorldWidth() - barDistFromWalls - barWidth, barY, barWidth * enemyPlayer.getHealth() / Constants.PLAYER_MAX_HEALTH, barHeight);
+
+        final String drawnText;
+        if(boss.getHealth() <= 0) {
+            drawnText = "You Lost!";
+        } else if(enemyPlayer.getHealth() <= 0) {
+            drawnText = "You Won!";
+        } else {
+            drawnText = null;
+        }
+
+
+        String pressAnyKeyText = "Press any key to go back to menu";
+        GlyphLayout layout;
+        GlyphLayout pressAnyKeyLayout;
+
+        if(drawnText != null) {
+             layout = new GlyphLayout(font, drawnText);
+
+             font.getData().setScale(0.5f);
+             pressAnyKeyLayout = new GlyphLayout(font, pressAnyKeyText);
+             font.getData().setScale(1);
+        } else {
+            layout = null;
+            pressAnyKeyLayout = null;
+        }
+
+        batch.setColor(Color.WHITE);
         batch.end();
 
         shapeRenderer.begin(ShapeType.Filled);
         shapeRenderer.setColor(new Color(1, 0, 0, 0.5f));
         Gdx.gl.glEnable(GL20.GL_BLEND);
         Gdx.gl.glBlendFunc(GL20.GL_ALPHA, GL20.GL_BLEND_SRC_ALPHA);
+        if(!gameFinished) {
 
-        for (int i = 0; i < powers.length; i++) {
-            TextureRegion power = powers[i];
-            float percent = percents[i];
-            if(percent < 1) {
-                shapeRenderer.rect(powerStartMargin + i * (power.getRegionWidth() + powerSpacing), 200, power.getRegionWidth(), power.getRegionHeight() * (1 - percent));
+
+            for (int i = 0; i < powers.length; i++) {
+                TextureRegion power = powers[i];
+                float percent = percents[i];
+                if (percent < 1) {
+                    shapeRenderer.rect(powerStartMargin + i * (power.getRegionWidth() + powerSpacing), 200, power.getRegionWidth(), power.getRegionHeight() * (1 - percent));
+                }
             }
+        } else if(layout != null) {
+            shapeRenderer.setColor(new Color(0, 0, 0, 0.5f));
+            shapeRenderer.rect(0, 150 - layout.height - 5, guiViewport.getWorldWidth(), layout.height + 10);
+            shapeRenderer.rect(0, 110 - pressAnyKeyLayout.height - 5, guiViewport.getWorldWidth(), pressAnyKeyLayout.height + 10);
+        } else {
+            Logger.log(this, "You shouldn't reach this place! PLACE: The last else in renderGUI using shapeRenderer");
         }
-
         shapeRenderer.end();
         Gdx.gl.glDisable(GL20.GL_BLEND);
+
+        if(layout != null) {
+            batch.begin();
+            font.setColor(new Color(1, 1, 1, 1 - alphaMult / 255f));
+            font.draw(batch, drawnText, guiViewport.getWorldWidth() / 2 - layout.width / 2, 150);
+
+            font.getData().setScale(0.5f);
+
+            font.draw(batch, pressAnyKeyText, guiViewport.getWorldWidth() / 2 - pressAnyKeyLayout.width / 2, 110);
+            batch.end();
+            font.getData().setScale(1);
+        }
     }
 
     @Override
@@ -203,12 +323,15 @@ public class GameScreen extends AbstractScreen implements InputProcessor {
     public AssetDescriptor[] getRequiredAssets() {
         return GeneralUtils.joinArrays(AssetDescriptor.class, EnemyPlayer.REQUIRED_ASSETS, BossPlayerRenderer.REQUIRED_ASSETS,
                 BossPlayer.REQUIRED_ASSETS, EnemyPlayerRenderer.REQUIRED_ASSETS, new AssetDescriptor[] {
-                        Particles.dust, Particles.groundPoundDust, Boss.powers, Background.arena, Background.sky});
+                        Particles.dust, Particles.groundPoundDust, Fonts.pixelmix, General.bar, Boss.powers, Background.arena, Background.sky});
     }
 
 
     @Override
     public boolean keyDown(int keycode) {
+        if(gameFinished) {
+            ga.transitionTo(new SplashScreenScreen(ga), TransitionTemplates.linearFade(1));
+        }
         return false;
     }
 

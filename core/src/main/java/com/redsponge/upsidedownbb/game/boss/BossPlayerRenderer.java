@@ -2,6 +2,7 @@ package com.redsponge.upsidedownbb.game.boss;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.assets.AssetDescriptor;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.ParticleEffect;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -44,7 +45,9 @@ public class BossPlayerRenderer implements IRenderer {
         TextureAtlas atlas = assets.get(Boss.frames);
         animations = new HashMap<>();
         for(AnimationDescriptor animation : Constants.BOSS_ANIMATION_DATA) {
-            animations.put(animation.name, GeneralUtils.getAnimation(animation, atlas, 1));
+            int startsAt = 1;
+            if(animation.name.equals("defeated")) startsAt = -1;
+            animations.put(animation.name, GeneralUtils.getAnimation(animation, atlas, startsAt));
             Logger.log(this, "Loaded animation", animation);
         }
     }
@@ -66,19 +69,38 @@ public class BossPlayerRenderer implements IRenderer {
         int h = 128;
 
         String animation = "run";
-        if(bossPlayer.isPunching()) {
+
+        if(bossPlayer.getEnemyPlayer().getHealth() <= 0) {
+            animation = "laugh";
+        }
+        else if(bossPlayer.isPunching()) {
             animation = "punch";
             startTime = bossPlayer.getPunchStartTime();
             w = 256;
         }
+        else if(bossPlayer.getHealth() <= 0) {
+            animation = "defeated";
+        }
 
-        if(bossPlayer.isOnGround()) {
+        if(bossPlayer.isOnGround() && bossPlayer.getHealth() > 0) {
             dustEffect.setPosition(x, bossPlayer.pos.y);
             dustEffect.draw(batch, Gdx.graphics.getDeltaTime());
         }
 
+        final float gb;
+        final float timeSinceHit = GeneralUtils.secondsSince(bossPlayer.getHitTime());
+        final float recoveryTime = 0.2f;
+
+        if(timeSinceHit < recoveryTime) {
+            gb = timeSinceHit / recoveryTime;
+        } else {
+            gb = 1;
+        }
+
+        batch.setColor(new Color(1, gb, gb, 1));
         TextureRegion toDraw = animations.get(animation).getKeyFrame(GeneralUtils.secondsSince(startTime));
         batch.draw(toDraw, x, bossPlayer.pos.y, w * dir, h);
+        batch.setColor(Color.WHITE);
 
         if(!gpDustEffect.isComplete()) {
             gpDustEffect.draw(batch, Gdx.graphics.getDeltaTime());

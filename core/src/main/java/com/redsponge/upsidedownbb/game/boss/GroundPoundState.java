@@ -7,6 +7,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.TimeUtils;
 import com.redsponge.upsidedownbb.utils.Constants;
 import com.redsponge.upsidedownbb.utils.GeneralUtils;
+import com.redsponge.upsidedownbb.utils.Logger;
 
 public enum GroundPoundState implements State<BossPlayer> {
     RAISE() {
@@ -36,7 +37,8 @@ public enum GroundPoundState implements State<BossPlayer> {
         public void update(BossPlayer entity) {
             final int direction = (entity.pos.x < wantedX ? 1 : -1);
             final int overAllX = Math.abs(startX - wantedX);
-            final float progress = GeneralUtils.secondsSince(startTime) / 0.5f;
+            float progress = GeneralUtils.secondsSince(startTime) / 0.5f;
+            if(progress > 1) progress = 1;
 
             vel.y = 0;
             vel.x = 0;
@@ -44,7 +46,11 @@ public enum GroundPoundState implements State<BossPlayer> {
             int neededY = startY + (int) (Interpolation.circleOut.apply(progress) * wantedY);
             int neededX = startX + (int) (Interpolation.circleOut.apply(progress) * overAllX) * direction;
 
-            entity.moveX(Math.abs(neededX - entity.pos.x) * direction, null);
+            int toMoveX = Math.abs(neededX - entity.pos.x);
+            if(toMoveX > 100) {
+                Logger.log(this, toMoveX, neededX, entity.pos.x, progress, direction, overAllX);
+            }
+            entity.moveX(toMoveX * direction, null);
             entity.moveY(Math.abs(neededY - entity.pos.y), null);
 
 
@@ -68,7 +74,7 @@ public enum GroundPoundState implements State<BossPlayer> {
         public void update(BossPlayer entity) {
 
             if(entity.isGroundPounding() && entity.getEnemyPlayer().isTouchingEnemy()) {
-                entity.getEnemyPlayer().takenHit();
+                entity.getEnemyPlayer().attacked(20);
             }
 
             vel.y += -100;

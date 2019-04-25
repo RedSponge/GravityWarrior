@@ -8,7 +8,9 @@ names = [
         ("head_stuck", 2),
         ("plunging", 1),
         ("slice", 7),
-        ("duck", 3)
+        ("duck", 3),
+        ("dab", 9),
+        ("happy_jump", 4)
 ]
 
 offset = 1

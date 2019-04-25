@@ -4,6 +4,34 @@ size: 512,256
 format: RGBA8888
 filter: Nearest,Nearest
 repeat: none
+defeated
+  rotate: false
+  xy: 132, 2
+  size: 64, 64
+  orig: 64, 64
+  offset: 0, 0
+  index: -1
+laugh
+  rotate: false
+  xy: 262, 68
+  size: 64, 64
+  orig: 64, 64
+  offset: 0, 0
+  index: 1
+laugh
+  rotate: false
+  xy: 392, 134
+  size: 64, 64
+  orig: 64, 64
+  offset: 0, 0
+  index: 2
+laugh
+  rotate: false
+  xy: 198, 2
+  size: 64, 64
+  orig: 64, 64
+  offset: 0, 0
+  index: 3
 punch
   rotate: false
   xy: 2, 134
@@ -55,28 +83,28 @@ punch
   index: 7
 run
   rotate: false
-  xy: 132, 2
+  xy: 328, 68
   size: 64, 64
   orig: 64, 64
   offset: 0, 0
   index: 1
 run
   rotate: false
-  xy: 262, 68
+  xy: 264, 2
   size: 64, 64
   orig: 64, 64
   offset: 0, 0
   index: 2
 run
   rotate: false
-  xy: 392, 134
+  xy: 394, 68
   size: 64, 64
   orig: 64, 64
   offset: 0, 0
   index: 3
 run
   rotate: false
-  xy: 198, 2
+  xy: 330, 2
   size: 64, 64
   orig: 64, 64
   offset: 0, 0

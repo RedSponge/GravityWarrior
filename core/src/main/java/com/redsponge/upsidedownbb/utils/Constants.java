@@ -1,5 +1,6 @@
 package com.redsponge.upsidedownbb.utils;
 
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Animation.PlayMode;
 import com.redsponge.upsidedownbb.assets.AnimationDescriptor;
 
@@ -34,12 +35,16 @@ public class Constants {
             new AnimationDescriptor(2, "head_stuck", 0.1f, PlayMode.LOOP),
             new AnimationDescriptor(1, "plunging", 1, PlayMode.LOOP),
             new AnimationDescriptor(7, "slice", SLICE_LENGTH / 7, PlayMode.LOOP),
-            new AnimationDescriptor(3, "duck", 0.01f, PlayMode.NORMAL)
+            new AnimationDescriptor(3, "duck", 0.01f, PlayMode.NORMAL),
+            new AnimationDescriptor(9, "dab", 0.05f, PlayMode.NORMAL),
+            new AnimationDescriptor(4, "happy_jump", 0.1f, PlayMode.LOOP_PINGPONG)
     };
 
     public static final AnimationDescriptor[] BOSS_ANIMATION_DATA = {
             new AnimationDescriptor(4, "run", 0.1f, PlayMode.LOOP_PINGPONG),
             new AnimationDescriptor(7, "punch", PUNCH_LENGTH / 7, PlayMode.NORMAL),
+            new AnimationDescriptor(1, "defeated", 1, PlayMode.NORMAL),
+            new AnimationDescriptor(3, "laugh", 0.1f, PlayMode.LOOP_PINGPONG)
     };
 
     public static final int PLAYER_DUCK_HEIGHT = 16;
@@ -51,6 +56,13 @@ public class Constants {
     public static final float DASH_COOLDOWN = 1;
     public static final float GROUND_POUND_COOLDOWN = 10;
 
-    public static final int MAX_GROUND_POUND_DISTANCE = 300;
+    public static final int MAX_GROUND_POUND_DISTANCE = 200;
     public static final float PUNCH_BOX_DELAY = 0.3f;
+    public static final int BOSS_MAX_HEALTH = 10;
+    public static final int PLAYER_MAX_HEALTH = 200;
+    public static final int REGULAR_HIT_DAMAGE = 10;
+    public static final int PLUNGE_ATTACK_DAMAGE = 20;
+
+    public static final int BOSS_BAR_COLOR = 0xFF4C4C00;
+    public static final int PLAYER_BAR_COLOR = 0x00FAFF00;
 }

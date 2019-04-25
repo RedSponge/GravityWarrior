@@ -1,10 +1,9 @@
-Player:
- - Detect if hit boss with sword by y and not only by x
-
 Boss:
  - GP sprites maybe
 
 General:
+ - Either win or lose message
+
  - See where can add more particles
  - See where can add more sounds
  - Finish math homework already

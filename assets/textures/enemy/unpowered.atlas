@@ -1,68 +1,159 @@
 
 unpowered.png
-size: 1024,64
+size: 1024,128
 format: RGBA8888
 filter: Nearest,Nearest
 repeat: none
-duck
+dab
+  rotate: false
+  xy: 2, 52
+  size: 32, 48
+  orig: 32, 48
+  offset: 0, 0
+  index: 1
+dab
   rotate: false
   xy: 2, 2
+  size: 32, 48
+  orig: 32, 48
+  offset: 0, 0
+  index: 2
+dab
+  rotate: false
+  xy: 36, 52
+  size: 32, 48
+  orig: 32, 48
+  offset: 0, 0
+  index: 3
+dab
+  rotate: false
+  xy: 36, 2
+  size: 32, 48
+  orig: 32, 48
+  offset: 0, 0
+  index: 4
+dab
+  rotate: false
+  xy: 36, 2
+  size: 32, 48
+  orig: 32, 48
+  offset: 0, 0
+  index: 5
+dab
+  rotate: false
+  xy: 36, 2
+  size: 32, 48
+  orig: 32, 48
+  offset: 0, 0
+  index: 7
+dab
+  rotate: false
+  xy: 36, 2
+  size: 32, 48
+  orig: 32, 48
+  offset: 0, 0
+  index: 6
+dab
+  rotate: false
+  xy: 70, 52
+  size: 32, 48
+  orig: 32, 48
+  offset: 0, 0
+  index: 8
+dab
+  rotate: false
+  xy: 70, 2
+  size: 32, 48
+  orig: 32, 48
+  offset: 0, 0
+  index: 9
+duck
+  rotate: false
+  xy: 104, 52
   size: 32, 48
   orig: 32, 48
   offset: 0, 0
   index: 1
 duck
   rotate: false
-  xy: 36, 2
+  xy: 104, 2
   size: 32, 48
   orig: 32, 48
   offset: 0, 0
   index: 2
 duck
   rotate: false
-  xy: 70, 2
+  xy: 138, 52
   size: 32, 48
   orig: 32, 48
   offset: 0, 0
   index: 3
 fallen
   rotate: false
-  xy: 104, 2
-  size: 32, 48
-  orig: 32, 48
-  offset: 0, 0
-  index: 1
-head_stuck
-  rotate: false
   xy: 138, 2
   size: 32, 48
   orig: 32, 48
   offset: 0, 0
   index: 1
-head_stuck
+happy_jump
+  rotate: false
+  xy: 172, 52
+  size: 32, 48
+  orig: 32, 48
+  offset: 0, 0
+  index: 1
+happy_jump
   rotate: false
   xy: 172, 2
   size: 32, 48
   orig: 32, 48
   offset: 0, 0
   index: 2
-hit
+happy_jump
+  rotate: false
+  xy: 206, 52
+  size: 32, 48
+  orig: 32, 48
+  offset: 0, 0
+  index: 3
+happy_jump
   rotate: false
   xy: 206, 2
   size: 32, 48
   orig: 32, 48
   offset: 0, 0
+  index: 4
+head_stuck
+  rotate: false
+  xy: 240, 52
+  size: 32, 48
+  orig: 32, 48
+  offset: 0, 0
   index: 1
-hit
+head_stuck
   rotate: false
   xy: 240, 2
   size: 32, 48
   orig: 32, 48
   offset: 0, 0
   index: 2
-idle
+hit
+  rotate: false
+  xy: 274, 52
+  size: 32, 48
+  orig: 32, 48
+  offset: 0, 0
+  index: 1
+hit
   rotate: false
   xy: 274, 2
+  size: 32, 48
+  orig: 32, 48
+  offset: 0, 0
+  index: 2
+idle
+  rotate: false
+  xy: 308, 52
   size: 32, 48
   orig: 32, 48
   offset: 0, 0
@@ -76,126 +167,126 @@ idle
   index: 2
 idle
   rotate: false
-  xy: 342, 2
+  xy: 342, 52
   size: 32, 48
   orig: 32, 48
   offset: 0, 0
   index: 3
 idle
   rotate: false
-  xy: 376, 2
+  xy: 342, 2
   size: 32, 48
   orig: 32, 48
   offset: 0, 0
   index: 4
 plunging
   rotate: false
-  xy: 410, 2
+  xy: 376, 52
   size: 32, 48
   orig: 32, 48
   offset: 0, 0
   index: 1
+run
+  rotate: false
+  xy: 376, 2
+  size: 32, 48
+  orig: 32, 48
+  offset: 0, 0
+  index: 1
+run
+  rotate: false
+  xy: 410, 52
+  size: 32, 48
+  orig: 32, 48
+  offset: 0, 0
+  index: 2
+run
+  rotate: false
+  xy: 410, 2
+  size: 32, 48
+  orig: 32, 48
+  offset: 0, 0
+  index: 3
+run
+  rotate: false
+  xy: 444, 52
+  size: 32, 48
+  orig: 32, 48
+  offset: 0, 0
+  index: 4
 run
   rotate: false
   xy: 444, 2
   size: 32, 48
   orig: 32, 48
   offset: 0, 0
-  index: 1
+  index: 5
+run
+  rotate: false
+  xy: 478, 52
+  size: 32, 48
+  orig: 32, 48
+  offset: 0, 0
+  index: 6
 run
   rotate: false
   xy: 478, 2
   size: 32, 48
   orig: 32, 48
   offset: 0, 0
-  index: 2
-run
-  rotate: false
-  xy: 512, 2
-  size: 32, 48
-  orig: 32, 48
-  offset: 0, 0
-  index: 3
-run
-  rotate: false
-  xy: 546, 2
-  size: 32, 48
-  orig: 32, 48
-  offset: 0, 0
-  index: 4
-run
-  rotate: false
-  xy: 580, 2
-  size: 32, 48
-  orig: 32, 48
-  offset: 0, 0
-  index: 5
-run
-  rotate: false
-  xy: 614, 2
-  size: 32, 48
-  orig: 32, 48
-  offset: 0, 0
-  index: 6
-run
-  rotate: false
-  xy: 648, 2
-  size: 32, 48
-  orig: 32, 48
-  offset: 0, 0
   index: 7
 run
   rotate: false
-  xy: 682, 2
+  xy: 512, 52
   size: 32, 48
   orig: 32, 48
   offset: 0, 0
   index: 8
 slice
   rotate: false
-  xy: 716, 2
+  xy: 512, 2
   size: 32, 48
   orig: 32, 48
   offset: 0, 0
   index: 1
 slice
   rotate: false
-  xy: 750, 2
+  xy: 546, 52
   size: 32, 48
   orig: 32, 48
   offset: 0, 0
   index: 2
 slice
   rotate: false
-  xy: 784, 2
+  xy: 546, 2
   size: 32, 48
   orig: 32, 48
   offset: 0, 0
   index: 3
 slice
   rotate: false
-  xy: 818, 2
+  xy: 580, 52
   size: 32, 48
   orig: 32, 48
   offset: 0, 0
   index: 4
 slice
   rotate: false
-  xy: 852, 2
+  xy: 580, 2
   size: 32, 48
   orig: 32, 48
   offset: 0, 0
   index: 5
 slice
   rotate: false
-  xy: 886, 2
+  xy: 614, 52
   size: 32, 48
   orig: 32, 48
   offset: 0, 0
   index: 6
 slice
   rotate: false
-  xy: 920, 2
+  xy: 614, 2
   size: 32, 48
   orig: 32, 48
   offset: 0, 0

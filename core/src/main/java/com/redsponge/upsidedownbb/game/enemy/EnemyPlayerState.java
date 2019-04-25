@@ -12,7 +12,7 @@ public enum EnemyPlayerState implements State<EnemyPlayer> {
         @Override
         public void update(EnemyPlayer entity) {
             entity.moveAwayFromBoss();
-            if(MathUtils.randomBoolean(0.01f) && (entity.distanceFromBoss() > 100 || entity.isTouchingWalls())) {
+            if(MathUtils.randomBoolean(1) && (entity.distanceFromBoss() > 100 || entity.isTouchingWalls())) {
                 if(MathUtils.randomBoolean()) {
                     entity.getStateMachine().changeState(SUPER_ATTACK_FROM_TOP);
                 } else {
@@ -25,7 +25,7 @@ public enum EnemyPlayerState implements State<EnemyPlayer> {
         public boolean onMessage(EnemyPlayer entity, Telegram telegram) {
             switch (telegram.message) {
                 case MessageType.BOSS_PUNCH_BEGIN: {
-                    if (entity.shouldDuck() && !entity.isDucking()) {
+                    if (MathUtils.randomBoolean() && entity.shouldDuck() && !entity.isDucking()) {
                         entity.getStateMachine().changeState(DUCK_DODGE);
                     }
                 } break;
@@ -35,12 +35,21 @@ public enum EnemyPlayerState implements State<EnemyPlayer> {
     },
 
     RUN_TO_ATTACK() {
+        private int numAttacks;
+
+        @Override
+        public void enter(EnemyPlayer entity) {
+            numAttacks = MathUtils.random(5, 20);
+        }
+
         @Override
         public void update(EnemyPlayer entity) {
             entity.runToBoss();
             if(entity.canAttackBoss()) {
                 entity.attackBoss();
-                entity.getStateMachine().changeState(RUN_AWAY);
+                numAttacks--;
+                if(numAttacks <= 0)
+                    entity.getStateMachine().changeState(RUN_AWAY);
             }
         }
     },
@@ -72,7 +81,7 @@ public enum EnemyPlayerState implements State<EnemyPlayer> {
     GOT_HIT() {
         @Override
         public void enter(EnemyPlayer entity) {
-            entity.takenHit();
+            entity.attacked(10);
         }
 
         @Override
