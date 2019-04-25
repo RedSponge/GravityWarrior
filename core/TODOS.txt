@@ -1,18 +1,18 @@
 Boss:
  - GP sprites maybe
 
-General:
- - Either win or lose message
-
  - See where can add more particles
  - See where can add more sounds
+
  - Finish math homework already
- - Menu Screen
+ - Menu Screen // Started WOrking!
  - Pause Screen
+
  - ** Actual Options Menu! **
-   - Keybinds
-   - Volume
+   - Keybinds V
+   - Volume - Need to connect to fields
    - Accessible from pause
+
  - Tutorial Text
 
- - VERY IFFY: MAYBE ADD A SMALL PLATFORMING SECTION TO INTRODUCE THE CHARACTER
+ - NOT HAPPENING: MAYBE ADD A SMALL PLATFORMING SECTION TO INTRODUCE THE CHARACTER
