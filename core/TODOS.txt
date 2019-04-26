@@ -4,7 +4,7 @@ Boss:
  - Finish math homework already
  - Also finish history homework
 
- - Tutorial Text
+ - Tutorial Text <---- THIS TOMORROW
 
  - NOT HAPPENING: MAYBE ADD A SMALL PLATFORMING SECTION TO INTRODUCE THE CHARACTER
 
