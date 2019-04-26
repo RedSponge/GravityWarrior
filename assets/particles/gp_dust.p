@@ -2,16 +2,16 @@ Untitled
 - Delay -
 active: false
 - Duration - 
-lowMin: 50.0
-lowMax: 50.0
+lowMin: 300.0
+lowMax: 300.0
 - Count - 
-min: 0
-max: 50
+min: 50
+max: 100
 - Emission - 
 lowMin: 0.0
 lowMax: 0.0
-highMin: 2000.0
-highMax: 2000.0
+highMin: 50.0
+highMax: 50.0
 relative: false
 scalingCount: 1
 scaling0: 1.0
@@ -20,8 +20,8 @@ timeline0: 0.0
 - Life - 
 lowMin: 0.0
 lowMax: 0.0
-highMin: 800.0
-highMax: 800.0
+highMin: 1000.0
+highMax: 1000.0
 relative: false
 scalingCount: 1
 scaling0: 1.0
@@ -32,8 +32,8 @@ independent: false
 active: true
 lowMin: 0.0
 lowMax: 0.0
-highMin: 50.0
-highMax: 100.0
+highMin: 100.0
+highMax: 200.0
 relative: false
 scalingCount: 3
 scaling0: 0.0
@@ -45,27 +45,9 @@ timeline1: 0.5205479
 timeline2: 0.70547944
 independent: false
 - X Offset - 
-active: true
-lowMin: -30.0
-lowMax: 30.0
-highMin: 0.0
-highMax: 0.0
-relative: false
-scalingCount: 1
-scaling0: 1.0
-timelineCount: 1
-timeline0: 0.0
+active: false
 - Y Offset - 
-active: true
-lowMin: -30.0
-lowMax: 30.0
-highMin: 0.0
-highMax: 0.0
-relative: false
-scalingCount: 1
-scaling0: 1.0
-timelineCount: 1
-timeline0: 0.0
+active: false
 - Spawn Shape - 
 shape: point
 - Spawn Width - 
@@ -153,8 +135,8 @@ timeline2: 0.760274
 active: true
 lowMin: 0.0
 lowMax: 0.0
-highMin: 200.0
-highMax: 200.0
+highMin: 50.0
+highMax: 300.0
 relative: false
 scalingCount: 4
 scaling0: 0.0

@@ -1,6 +1,5 @@
 package com.redsponge.upsidedownbb.game.boss;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.ai.fsm.DefaultStateMachine;
 import com.badlogic.gdx.ai.fsm.StateMachine;
 import com.badlogic.gdx.ai.msg.MessageManager;
@@ -166,10 +165,10 @@ public class BossPlayer extends PActor implements IUpdated, Telegraph {
     }
 
     private void createPunchBox() {
-        punchBox = new PunchBox(worldIn);
+        punchBox = new PunchBox(worldIn, enemyPlayer);
         int dir = getDirection();
         int offsetX = dir == 1 ? size.x + 1 : -Constants.PUNCH_SIZE.x;
-        punchBox.pos.set(pos.copy().add(offsetX, Constants.PUNCH_SIZE.y / 2));
+        punchBox.pos.set(pos.copy().add(offsetX, size.y / 2 - Constants.PUNCH_SIZE.y / 2));
         punchBox.size.set(Constants.PUNCH_SIZE.copy());
 
         worldIn.addActor(punchBox);

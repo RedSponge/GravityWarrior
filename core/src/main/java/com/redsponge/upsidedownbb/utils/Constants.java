@@ -1,6 +1,5 @@
 package com.redsponge.upsidedownbb.utils;
 
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Animation.PlayMode;
 import com.redsponge.upsidedownbb.assets.AnimationDescriptor;
 
@@ -16,7 +15,7 @@ public class Constants {
     public static final int CEILLING_HEIGHT = 239;
     public static final int FLOOR_HEIGHT = 20;
 
-    public static final IntVector2 PUNCH_SIZE = new IntVector2(100, 50);
+    public static final IntVector2 PUNCH_SIZE = new IntVector2(80, 100);
 
     public static final float PUNCH_LENGTH = 0.5f;
     public static final int BOSS_WIDTH = 128;

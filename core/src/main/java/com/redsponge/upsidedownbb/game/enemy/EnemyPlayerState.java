@@ -81,7 +81,7 @@ public enum EnemyPlayerState implements State<EnemyPlayer> {
     GOT_HIT() {
         @Override
         public void enter(EnemyPlayer entity) {
-            entity.addHealth(-10);
+            entity.attacked(10);
             if(entity.isOnGround() && entity.pos.x > 100) {
                 entity.getVel().y = 0;
             }

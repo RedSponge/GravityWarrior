@@ -8,6 +8,7 @@ import com.badlogic.gdx.utils.TimeUtils;
 import com.redsponge.upsidedownbb.utils.Constants;
 import com.redsponge.upsidedownbb.utils.GeneralUtils;
 import com.redsponge.upsidedownbb.utils.Logger;
+import com.redsponge.upsidedownbb.utils.Settings;
 
 public enum GroundPoundState implements State<BossPlayer> {
     RAISE() {
@@ -51,7 +52,8 @@ public enum GroundPoundState implements State<BossPlayer> {
             int neededX = startX + (int) (Interpolation.circleOut.apply(progress) * overAllX) * direction;
             int toMoveX = Math.abs(neededX - entity.pos.x);
 
-            Logger.log(this, "ToMove:",toMoveX, "StartX:",startX, "Interpolated:", Interpolation.circleOut.apply(progress), "Need to be in:",neededX, "Current Pos:",entity.pos.x, "Time Progress:",progress, "Direction:",direction, "FinalX:",overAllX);
+            // For GP Raise Debug:
+            //Logger.log(this, "ToMove:",toMoveX, "StartX:",startX, "Interpolated:", Interpolation.circleOut.apply(progress), "Need to be in:",neededX, "Current Pos:",entity.pos.x, "Time Progress:",progress, "Direction:",direction, "FinalX:",overAllX);
 
             entity.moveX(toMoveX * direction, null);
             entity.moveY(Math.abs(neededY - entity.pos.y), null);
@@ -69,7 +71,7 @@ public enum GroundPoundState implements State<BossPlayer> {
         public void enter(BossPlayer entity) {
             vel = entity.getVel();
             vel.y = 0;
-            entity.getGPFallSound().play();
+            entity.getGPFallSound().play(Settings.soundVol);
         }
 
         @Override

@@ -91,6 +91,12 @@ public class EnemyPlayer extends PActor implements IUpdated, Telegraph {
             });
         }
 
+        if(isDucking()) {
+            size.y = Constants.PLAYER_DUCK_HEIGHT;
+        } else {
+            size.y = Constants.PLAYER_HEIGHT;
+        }
+
         onGround = collideFirst(pos.copy().add(0, -1)) instanceof Platform
         || collideFirst(pos.copy().add(0, size.y + 1)) instanceof Platform;
 

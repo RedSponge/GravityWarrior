@@ -53,7 +53,7 @@ public class BossPlayerRenderer implements IRenderer {
     }
 
     public void startGPDust() {
-        gpDustEffect.setPosition(bossPlayer.pos.x, bossPlayer.pos.y);
+        gpDustEffect.setPosition(bossPlayer.pos.x + bossPlayer.size.x / 2, bossPlayer.pos.y);
         gpDustEffect.start();
     }
 
@@ -102,9 +102,8 @@ public class BossPlayerRenderer implements IRenderer {
         batch.draw(toDraw, x, bossPlayer.pos.y, w * dir, h);
         batch.setColor(Color.WHITE);
 
-        if(!gpDustEffect.isComplete()) {
-            gpDustEffect.draw(batch, Gdx.graphics.getDeltaTime());
-        }
+        gpDustEffect.draw(batch, Gdx.graphics.getDeltaTime());
+
     }
 
     @Override

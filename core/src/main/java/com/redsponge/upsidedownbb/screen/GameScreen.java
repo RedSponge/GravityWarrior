@@ -331,6 +331,8 @@ public class GameScreen extends AbstractScreen implements InputProcessor {
         batch.draw(arenaBackground, 0, 0);
         batch.end();
 
+        pdr.render(world, gameViewport.getCamera().combined);
+
         guiViewport.apply();
         batch.setProjectionMatrix(guiViewport.getCamera().combined);
         shapeRenderer.setProjectionMatrix(guiViewport.getCamera().combined);
