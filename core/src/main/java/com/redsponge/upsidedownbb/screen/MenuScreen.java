@@ -2,6 +2,7 @@ package com.redsponge.upsidedownbb.screen;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.assets.AssetDescriptor;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.Interpolation;
@@ -12,8 +13,8 @@ import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.ui.Button;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
+import com.badlogic.gdx.scenes.scene2d.ui.SelectBox;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
-import com.badlogic.gdx.scenes.scene2d.ui.Slider;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
@@ -23,16 +24,14 @@ import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.redsponge.upsidedownbb.assets.AssetDescBin.Background;
 import com.redsponge.upsidedownbb.assets.AssetDescBin.Menu;
 import com.redsponge.upsidedownbb.assets.AssetDescBin.Skins;
+import com.redsponge.upsidedownbb.game.enemy.WinStyle;
 import com.redsponge.upsidedownbb.transitions.TransitionTemplates;
+import com.redsponge.upsidedownbb.ui.FieldSlider;
 import com.redsponge.upsidedownbb.ui.KeySelector;
 import com.redsponge.upsidedownbb.ui.KeySelectorGroup;
 import com.redsponge.upsidedownbb.utils.Constants;
 import com.redsponge.upsidedownbb.utils.GameAccessor;
 import com.redsponge.upsidedownbb.utils.Settings;
-import javafx.scene.control.Tab;
-
-import java.util.Arrays;
-import java.util.stream.Collectors;
 
 public class MenuScreen extends AbstractScreen {
 
@@ -80,11 +79,6 @@ public class MenuScreen extends AbstractScreen {
         Button customizing = getButton(skin, "Customizables");
         Button exit = getButton(skin, "Exit");
 
-        stage.addActor(start);
-        stage.addActor(options);
-        stage.addActor(customizing);
-        stage.addActor(exit);
-
         setupEnterActions(180, titleLoaded ? 0 : 1.5f, start, options, customizing, exit);
 
         start.addListener(new ClickListener() {
@@ -102,6 +96,14 @@ public class MenuScreen extends AbstractScreen {
             }
         });
 
+        customizing.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                clearStage();
+                pendingMenuLayout = MenuScreen.this::setupCustomizingButtons;
+            }
+        });
+
         exit.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
@@ -116,16 +118,16 @@ public class MenuScreen extends AbstractScreen {
         Table music = new Table(skin);
         Label musicL = new Label("Music: ", skin);
 
-        Slider musicSlider = new Slider(0, 100, 1, false, skin);
+        FieldSlider musicSlider = new FieldSlider(0, 100, 1, false, skin, Settings.class, null, "musicVol");
+        music.add(musicL, musicSlider);
 
-        music.add(musicL);
-        music.add(musicSlider);
 
         Table sound = new Table(skin);
         Label soundL = new Label("Sound: ", skin);
 
-        Slider soundSlider = new Slider(0, 100, 1, false, skin);
+        FieldSlider soundSlider = new FieldSlider(0, 100, 1, false, skin, Settings.class, null, "soundVol");
         sound.add(soundL, soundSlider);
+
 
         KeySelectorGroup keys = new KeySelectorGroup(skin);
         KeySelector attack = new KeySelector(skin, Settings.class, null, "keyPunch");
@@ -144,13 +146,26 @@ public class MenuScreen extends AbstractScreen {
         stage.addActor(music);
 
         sound.pack();
-        stage.addActor(sound);
-
-        stage.addActor(keys);
-
-        stage.addActor(back);
 
         setupEnterActions(180, 0, music, sound, keys, back);
+    }
+
+    private void setupCustomizingButtons() {
+        Table winStyles = new Table();
+
+        Label winStylesL = new Label("Win Style:", skin);
+
+        SelectBox<WinStyle> winStylesSB = new SelectBox<WinStyle>(skin);
+        winStylesSB.setItems(WinStyle.values());
+        winStylesSB.setWidth(100);
+
+        winStyles.add(winStylesL).pad(10);
+        winStyles.add(winStylesSB).pad(10);
+        winStyles.pack();
+
+        Button back = getBackButton(skin, this::setupMenuButtons);
+
+        setupEnterActions(150, 0, winStyles, back);
     }
 
     @SuppressWarnings("SameParameterValue")
@@ -166,6 +181,7 @@ public class MenuScreen extends AbstractScreen {
                 b.setPosition(viewport.getWorldWidth(), y);
             }
             b.addAction(Actions.sequence(Actions.delay(i * 0.5f + enterDelay), Actions.moveToAligned(viewport.getWorldWidth() / 2, y, Align.bottom, 1, Interpolation.exp5Out)));
+            stage.addActor(b);
         }
     }
 
@@ -224,6 +240,7 @@ public class MenuScreen extends AbstractScreen {
         batch.setProjectionMatrix(viewport.getCamera().combined);
 
         batch.begin();
+        batch.setColor(Color.WHITE);
 
         batch.draw(sky, -xSkyOffset, 0);
         batch.draw(sky, sky.getWidth() - xSkyOffset, 0);

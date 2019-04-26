@@ -7,7 +7,6 @@ import com.badlogic.gdx.math.Interpolation;
 import com.badlogic.gdx.utils.TimeUtils;
 import com.redsponge.upsidedownbb.EngineGame;
 import com.redsponge.upsidedownbb.screen.AbstractScreen;
-import com.redsponge.upsidedownbb.utils.GeneralUtils;
 import com.redsponge.upsidedownbb.utils.Logger;
 
 public class TransitionManager {
@@ -40,7 +39,6 @@ public class TransitionManager {
         if(!switched || shouldProcessExit) {
             timeCounter += delta;
         }
-        Logger.log(this, delta);
 
         float timeSince = timeCounter;
 

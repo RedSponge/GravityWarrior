@@ -5,7 +5,8 @@ Boss:
  - See where can add more sounds
 
  - Finish math homework already
- - Menu Screen // Started WOrking!
+ - Menu Screen // Started Working!
+
  - Pause Screen
 
  - ** Actual Options Menu! **

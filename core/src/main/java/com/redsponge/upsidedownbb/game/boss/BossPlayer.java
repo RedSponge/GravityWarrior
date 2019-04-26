@@ -141,14 +141,14 @@ public class BossPlayer extends PActor implements IUpdated, Telegraph {
     private void beginGroundPound() {
         gpStartTime = TimeUtils.nanoTime();
         groundPoundStateMachine.changeState(GroundPoundState.RAISE);
-        gpRiseSound.play();
+        gpRiseSound.play(Settings.soundVol);
     }
 
     public void attacked(int health) {
         if(groundPoundStateMachine.getCurrentState() != GroundPoundState.INACTIVE) return;
 
         this.health -= health;
-        hitSound.play();
+        hitSound.play(Settings.soundVol);
         hitTime = TimeUtils.nanoTime();
     }
 
@@ -190,7 +190,7 @@ public class BossPlayer extends PActor implements IUpdated, Telegraph {
 
     private void beginPunch() {
         punchStartTime = TimeUtils.nanoTime();
-        biteSound.play();
+        biteSound.play(Settings.soundVol);
     }
 
     public int getDirection() {

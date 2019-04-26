@@ -18,13 +18,26 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
+import com.badlogic.gdx.scenes.scene2d.InputListener;
+import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.Button;
+import com.badlogic.gdx.scenes.scene2d.ui.Label;
+import com.badlogic.gdx.scenes.scene2d.ui.Skin;
+import com.badlogic.gdx.scenes.scene2d.ui.Table;
+import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
+import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.badlogic.gdx.utils.Align;
+import com.badlogic.gdx.utils.Scaling;
 import com.badlogic.gdx.utils.TimeUtils;
 import com.badlogic.gdx.utils.viewport.FitViewport;
+import com.badlogic.gdx.utils.viewport.ScalingViewport;
 import com.redsponge.upsidedownbb.assets.AssetDescBin.Background;
 import com.redsponge.upsidedownbb.assets.AssetDescBin.Boss;
 import com.redsponge.upsidedownbb.assets.AssetDescBin.Fonts;
 import com.redsponge.upsidedownbb.assets.AssetDescBin.General;
 import com.redsponge.upsidedownbb.assets.AssetDescBin.Particles;
+import com.redsponge.upsidedownbb.assets.AssetDescBin.Skins;
 import com.redsponge.upsidedownbb.game.Platform;
 import com.redsponge.upsidedownbb.game.boss.BossPlayer;
 import com.redsponge.upsidedownbb.game.boss.BossPlayerRenderer;
@@ -35,10 +48,14 @@ import com.redsponge.upsidedownbb.physics.PSolid;
 import com.redsponge.upsidedownbb.physics.PhysicsDebugRenderer;
 import com.redsponge.upsidedownbb.physics.PhysicsWorld;
 import com.redsponge.upsidedownbb.transitions.TransitionTemplates;
+import com.redsponge.upsidedownbb.ui.FieldSlider;
+import com.redsponge.upsidedownbb.ui.KeySelector;
+import com.redsponge.upsidedownbb.ui.KeySelectorGroup;
 import com.redsponge.upsidedownbb.utils.Constants;
 import com.redsponge.upsidedownbb.utils.GameAccessor;
 import com.redsponge.upsidedownbb.utils.GeneralUtils;
 import com.redsponge.upsidedownbb.utils.Logger;
+import com.redsponge.upsidedownbb.utils.Settings;
 
 public class GameScreen extends AbstractScreen implements InputProcessor {
 
@@ -48,7 +65,6 @@ public class GameScreen extends AbstractScreen implements InputProcessor {
     private PhysicsWorld world;
     private BossPlayer boss;
 
-    private PSolid floor;
     private PhysicsDebugRenderer pdr;
 
     private BossPlayerRenderer bossRenderer;
@@ -67,6 +83,15 @@ public class GameScreen extends AbstractScreen implements InputProcessor {
     private BitmapFont font;
     private long gameFinishTime;
 
+    private Stage pauseMenu;
+
+    private boolean paused;
+    private Skin pauseSkin;
+
+    private FitViewport pauseViewport;
+
+    private ScalingViewport overlayViewport;
+
     public GameScreen(GameAccessor ga) {
         super(ga);
     }
@@ -81,7 +106,7 @@ public class GameScreen extends AbstractScreen implements InputProcessor {
         world = new PhysicsWorld();
         boss = new BossPlayer(world, this, assets);
 
-        floor = new Platform(world);
+        PSolid floor = new Platform(world);
 
         floor.pos.set(0, 0);
         floor.size.set((int) Constants.ARENA_WIDTH, Constants.FLOOR_HEIGHT);
@@ -135,12 +160,106 @@ public class GameScreen extends AbstractScreen implements InputProcessor {
         boss.setRenderer(bossRenderer);
 
         font = assets.get(Fonts.pixelmix);
+
+        pauseViewport = new FitViewport(Constants.GAME_WIDTH, Constants.GAME_HEIGHT);
+
+        pauseMenu = new Stage(pauseViewport, batch);
+        pauseSkin = assets.get(Skins.menu);
+
+        pauseMenu.addListener(new InputListener() {
+            @Override
+            public boolean keyDown(InputEvent event, int keycode) {
+                if(keycode == Settings.keyPause) {
+                    togglePause();
+                    return true;
+                }
+                return false;
+            }
+        });
+
+
+        setupPauseMenu();
+
+        overlayViewport = new ScalingViewport(Scaling.fill, 1, 1);
+    }
+
+    private void setupPauseMenu() {
+
+        Label title = new Label("Pause Menu", pauseSkin);
+
+        Table music = new Table(pauseSkin);
+        Label musicL = new Label("Music: ", pauseSkin);
+
+        FieldSlider musicSlider = new FieldSlider(0, 100, 1, false, pauseSkin, Settings.class, null, "musicVol");
+        music.add(musicL, musicSlider);
+
+
+        Table sound = new Table(pauseSkin);
+        Label soundL = new Label("Sound: ", pauseSkin);
+
+        FieldSlider soundSlider = new FieldSlider(0, 100, 1, false, pauseSkin, Settings.class, null, "soundVol");
+        sound.add(soundL, soundSlider);
+
+
+        KeySelectorGroup keys = new KeySelectorGroup(pauseSkin);
+        KeySelector attack = new KeySelector(pauseSkin, Settings.class, null, "keyPunch");
+        KeySelector dash = new KeySelector(pauseSkin, Settings.class, null, "keyDash");
+        KeySelector ground_pound = new KeySelector(pauseSkin, Settings.class, null, "keyGroundPound");
+
+        String[] lbls = new String[] {"Attack", "Dash", "Ground Pound"};
+        KeySelector[] selectors = {attack, dash, ground_pound};
+
+        for(int i = 0; i < lbls.length; i++) {
+            keys.addLabel(lbls[i], selectors[i]);
+        }
+
+        keys.build();
+        music.pack();
+        sound.pack();
+
+        title.setPosition(pauseViewport.getWorldWidth() / 2, 240, Align.bottom);
+        music.setPosition(pauseViewport.getWorldWidth() / 2, 180, Align.bottom);
+        sound.setPosition(pauseViewport.getWorldWidth() / 2, 140, Align.bottom);
+        keys.setPosition(pauseViewport.getWorldWidth() / 2, 70, Align.bottom);
+
+        Button backToGame = new TextButton("Back To Game", pauseSkin);
+        backToGame.setPosition(pauseViewport.getWorldWidth() / 2, 40, Align.bottom);
+
+        backToGame.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                togglePause();
+            }
+        });
+
+        Button backToMenu = new TextButton("Back To Menu", pauseSkin);
+        backToMenu.setPosition(pauseViewport.getWorldWidth() / 2, 20, Align.center);
+
+        backToMenu.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                ga.transitionTo(new MenuScreen(ga), TransitionTemplates.sineSlide(1));
+            }
+        });
+
+        pauseMenu.addActor(title);
+        pauseMenu.addActor(music);
+        pauseMenu.addActor(sound);
+        pauseMenu.addActor(keys);
+        pauseMenu.addActor(backToGame);
+        pauseMenu.addActor(backToMenu);
     }
 
     private boolean gameFinished;
 
     @Override
     public void tick(float delta) {
+        backgroundMusic.setVolume(Settings.musicVol / 100f);
+        if(paused) {
+            pauseMenu.act();
+            return;
+        }
+
         if((boss.getHealth() <= 0 || enemyPlayer.getHealth() <= 0) && !gameFinished) {
             gameFinished = true;
             backgroundMusic.stop();
@@ -152,6 +271,17 @@ public class GameScreen extends AbstractScreen implements InputProcessor {
         GdxAI.getTimepiece().update(delta);
         MessageManager.getInstance().update();
         world.update(delta);
+
+        pauseMenu.act(delta);
+    }
+
+    private void togglePause() {
+        paused = !paused;
+        if(paused) {
+            Gdx.input.setInputProcessor(pauseMenu);
+        } else {
+            Gdx.input.setInputProcessor(this);
+        }
     }
 
     public boolean isGameFinished() {
@@ -292,7 +422,18 @@ public class GameScreen extends AbstractScreen implements InputProcessor {
             Logger.log(this, "You shouldn't reach this place! PLACE: The last else in renderGUI using shapeRenderer");
         }
         shapeRenderer.end();
+
+        if(paused) {
+            overlayViewport.apply();
+            shapeRenderer.setProjectionMatrix(overlayViewport.getCamera().combined);
+            shapeRenderer.begin(ShapeType.Filled);
+            shapeRenderer.setColor(new Color(0, 0, 0, 0.8f));
+            shapeRenderer.rect(0, 0, 1, 1);
+            shapeRenderer.end();
+        }
         Gdx.gl.glDisable(GL20.GL_BLEND);
+
+
 
         if(layout != null) {
             batch.begin();
@@ -304,6 +445,11 @@ public class GameScreen extends AbstractScreen implements InputProcessor {
             font.draw(batch, pressAnyKeyText, guiViewport.getWorldWidth() / 2 - pressAnyKeyLayout.width / 2, 110);
             batch.end();
             font.getData().setScale(1);
+        }
+
+        if(paused) {
+            pauseViewport.apply();
+            pauseMenu.draw();
         }
     }
 
@@ -317,13 +463,15 @@ public class GameScreen extends AbstractScreen implements InputProcessor {
     public void resize(int width, int height) {
         gameViewport.update(width, height);
         guiViewport.update(width, height, true);
+        pauseViewport.update(width, height, true);
+        overlayViewport.update(width, height, true);
     }
 
     @Override
     public AssetDescriptor[] getRequiredAssets() {
         return GeneralUtils.joinArrays(AssetDescriptor.class, EnemyPlayer.REQUIRED_ASSETS, BossPlayerRenderer.REQUIRED_ASSETS,
                 BossPlayer.REQUIRED_ASSETS, EnemyPlayerRenderer.REQUIRED_ASSETS, new AssetDescriptor[] {
-                        Particles.dust, Particles.groundPoundDust, Fonts.pixelmix, General.bar, Boss.powers, Background.arena, Background.sky});
+                        Particles.dust, Particles.groundPoundDust, Fonts.pixelmix, General.bar, Boss.powers, Background.arena, Background.sky, Skins.menu});
     }
 
 
@@ -331,6 +479,10 @@ public class GameScreen extends AbstractScreen implements InputProcessor {
     public boolean keyDown(int keycode) {
         if(gameFinished) {
             ga.transitionTo(new MenuScreen(ga), TransitionTemplates.sineSlide(1));
+        } else {
+            if(keycode == Settings.keyPause) {
+                togglePause();
+            }
         }
         return false;
     }

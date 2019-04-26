@@ -65,7 +65,7 @@ public class GeneralUtils {
     }
 
     public static void playSoundRandomlyPitched(Sound sound) {
-        playSoundRandomlyPitched(sound, 0.5f);
+        playSoundRandomlyPitched(sound, Settings.soundVol);
     }
 
     public static void playSoundRandomlyPitched(Sound sound, float vol) {

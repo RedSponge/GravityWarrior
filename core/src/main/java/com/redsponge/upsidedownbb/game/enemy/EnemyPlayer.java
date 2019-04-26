@@ -23,6 +23,7 @@ import com.redsponge.upsidedownbb.screen.GameScreen;
 import com.redsponge.upsidedownbb.utils.Constants;
 import com.redsponge.upsidedownbb.utils.GeneralUtils;
 import com.redsponge.upsidedownbb.utils.Logger;
+import com.redsponge.upsidedownbb.utils.Settings;
 
 public class EnemyPlayer extends PActor implements IUpdated, Telegraph {
 
@@ -149,7 +150,7 @@ public class EnemyPlayer extends PActor implements IUpdated, Telegraph {
     public void attackBoss() {
         Logger.log(this, "Attacked Boss!");
         attackStart = TimeUtils.nanoTime();
-        attackSound.play();
+        attackSound.play(Settings.soundVol);
         boss.attacked(Constants.REGULAR_HIT_DAMAGE);
     }
 

@@ -69,8 +69,7 @@ public class EnemyPlayerRenderer implements IRenderer {
         if(player.getHealth() <= 0) {
             currentAnimation = "fallen";
         } else if(player.getBoss().getHealth() <= 0) {
-            if(dabStartTime == 0 || GeneralUtils.secondsSince(dabStartTime) > animations.get("dab").a.getAnimationDuration()) {
-                Logger.log(this, animations.get("dab").a.getAnimationDuration());
+            if(dabStartTime == 0 || GeneralUtils.secondsSince(dabStartTime) > animations.get("dab").a.getAnimationDuration() + 1) {
                 dabStartTime = TimeUtils.nanoTime();
                 startTime = dabStartTime;
                 dabFlip = !dabFlip;
