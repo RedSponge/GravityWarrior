@@ -17,6 +17,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.SelectBox;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
+import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Array;
@@ -158,6 +159,14 @@ public class MenuScreen extends AbstractScreen {
         SelectBox<WinStyle> winStylesSB = new SelectBox<WinStyle>(skin);
         winStylesSB.setItems(WinStyle.values());
         winStylesSB.setWidth(100);
+        winStylesSB.setSelected(Settings.winStyle);
+
+        winStyles.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                Settings.winStyle = winStylesSB.getSelected();
+            }
+        });
 
         winStyles.add(winStylesL).pad(10);
         winStyles.add(winStylesSB).pad(10);

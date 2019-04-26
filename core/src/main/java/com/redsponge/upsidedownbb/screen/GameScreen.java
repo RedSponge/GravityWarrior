@@ -16,6 +16,7 @@ import com.badlogic.gdx.graphics.g2d.NinePatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
@@ -90,6 +91,8 @@ public class GameScreen extends AbstractScreen implements InputProcessor {
 
     private FitViewport pauseViewport;
 
+    private int screenShakes;
+
     private ScalingViewport overlayViewport;
 
     public GameScreen(GameAccessor ga) {
@@ -138,6 +141,8 @@ public class GameScreen extends AbstractScreen implements InputProcessor {
         bossRenderer = new BossPlayerRenderer(boss, assets);
         enemyRenderer = new EnemyPlayerRenderer(enemyPlayer, assets);
 
+        enemyPlayer.setRenderer(enemyRenderer);
+
         guiViewport = new FitViewport(Constants.GUI_WIDTH, Constants.GUI_HEIGHT);
 
         TextureAtlas powers = assets.get(Boss.powers);
@@ -181,6 +186,7 @@ public class GameScreen extends AbstractScreen implements InputProcessor {
         setupPauseMenu();
 
         overlayViewport = new ScalingViewport(Scaling.fill, 1, 1);
+        screenShakes = 10;
     }
 
     private void setupPauseMenu() {
@@ -309,7 +315,6 @@ public class GameScreen extends AbstractScreen implements InputProcessor {
             PEntity target = boss.getHealth() <= 0 ? boss : enemyPlayer;
             camPos.lerp(new Vector3(target.pos.x, target.pos.y, 0), 0.1f);
             ((OrthographicCamera) gameViewport.getCamera()).zoom = GeneralUtils.lerp(((OrthographicCamera) gameViewport.getCamera()).zoom, zoom, 0.1f);
-
         }
 
         if (camPos.x < gameViewport.getWorldWidth() * zoom / 2) camPos.x = gameViewport.getWorldWidth() * zoom / 2;
@@ -318,6 +323,11 @@ public class GameScreen extends AbstractScreen implements InputProcessor {
         if (camPos.x > Constants.ARENA_WIDTH - gameViewport.getWorldWidth() * zoom / 2)
             camPos.x = Constants.ARENA_WIDTH - gameViewport.getWorldWidth() * zoom / 2;
 
+        Vector3 unshaken = new Vector3(camPos);
+        if(screenShakes > 0) {
+            camPos.add(MathUtils.random(-5, 6), MathUtils.random(-5, 6), 0);
+            screenShakes--;
+        }
 
 
         gameViewport.apply();
@@ -332,6 +342,8 @@ public class GameScreen extends AbstractScreen implements InputProcessor {
         batch.end();
 
         pdr.render(world, gameViewport.getCamera().combined);
+
+        camPos.set(unshaken);
 
         guiViewport.apply();
         batch.setProjectionMatrix(guiViewport.getCamera().combined);
@@ -453,6 +465,14 @@ public class GameScreen extends AbstractScreen implements InputProcessor {
             pauseViewport.apply();
             pauseMenu.draw();
         }
+    }
+
+    public void setScreenShakes(int screenShakes) {
+        this.screenShakes = screenShakes;
+    }
+
+    public int getScreenShakes() {
+        return screenShakes;
     }
 
     @Override

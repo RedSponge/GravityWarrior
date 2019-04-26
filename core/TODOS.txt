@@ -1,19 +1,12 @@
 Boss:
- - GP sprites maybe
-
- - See where can add more particles
- - See where can add more sounds
+ - GP sprites maybe X
 
  - Finish math homework already
  - Also finish history homework
 
- - Custom win animation needs to be connected
-
  - Tutorial Text
 
  - NOT HAPPENING: MAYBE ADD A SMALL PLATFORMING SECTION TO INTRODUCE THE CHARACTER
-
-
 
 
 
@@ -41,3 +34,11 @@ Boss:
   - Ground pound grunts even when sound is 0 V
   - Ground pound sometimes doesn't work (doesn't show particles and doesn't damage) V
 
+- Screen Shake When GP Ends V
+
+- Custom win animation needs to be connected V
+
+- See where can add more particles V
+- See where can add more sounds V
+
+- Change all timings to be delta incremention instead of secondsSince to make menus etc.. ok V

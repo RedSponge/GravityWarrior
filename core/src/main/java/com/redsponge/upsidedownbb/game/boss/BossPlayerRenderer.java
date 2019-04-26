@@ -5,11 +5,11 @@ import com.badlogic.gdx.assets.AssetDescriptor;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.ParticleEffect;
+import com.badlogic.gdx.graphics.g2d.ParticleEffectPool;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
-import com.badlogic.gdx.utils.TimeUtils;
 import com.redsponge.upsidedownbb.assets.AnimationDescriptor;
 import com.redsponge.upsidedownbb.assets.AssetDescBin.Boss;
 import com.redsponge.upsidedownbb.assets.AssetDescBin.Particles;
@@ -23,20 +23,27 @@ import java.util.HashMap;
 
 public class BossPlayerRenderer implements IRenderer {
 
-    public static final AssetDescriptor[] REQUIRED_ASSETS = {Boss.frames};
+    public static final AssetDescriptor[] REQUIRED_ASSETS = {Boss.frames, Particles.dashStars};
 
     private ParticleEffect dustEffect;
     private ParticleEffect gpDustEffect;
+    private ParticleEffect dashEffect;
 
     private BossPlayer bossPlayer;
-    private long startTime;
+    private float timePassed;
     private HashMap<String, Animation<TextureRegion>> animations;
+
+    private ParticleEffectPool dashEffectPool;
+//    private DelayedRemovalArray<PooledEffect> dashEffects;
 
     public BossPlayerRenderer(BossPlayer bossPlayer, Assets assets) {
         this.bossPlayer = bossPlayer;
-        this.startTime = TimeUtils.nanoTime();
+        this.timePassed = 0;
         this.dustEffect = assets.get(Particles.dust);
         this.gpDustEffect = assets.get(Particles.groundPoundDust);
+        this.dashEffect = assets.get(Particles.dashStars);
+
+//        dashEffectPool = new ParticleEffectPool(dashStarsEffect, 3, 10);
 
         initAnimation(assets);
     }
@@ -57,8 +64,14 @@ public class BossPlayerRenderer implements IRenderer {
         gpDustEffect.start();
     }
 
+    public void startDash() {
+        dashEffect.reset();
+    }
+
     @Override
     public void render(SpriteBatch batch, ShapeRenderer shapeRenderer, Assets assets) {
+        timePassed += Gdx.graphics.getDeltaTime();
+
         int x = bossPlayer.pos.x;
         int dir = bossPlayer.getDirection();
         if(dir == 0) dir = 1;
@@ -75,7 +88,7 @@ public class BossPlayerRenderer implements IRenderer {
         }
         else if(bossPlayer.isPunching()) {
             animation = "punch";
-            startTime = bossPlayer.getPunchStartTime();
+            timePassed = bossPlayer.getPunchTimeCounter();
             w = 256;
         }
         else if(bossPlayer.getHealth() <= 0) {
@@ -88,7 +101,7 @@ public class BossPlayerRenderer implements IRenderer {
         }
 
         final float gb;
-        final float timeSinceHit = GeneralUtils.secondsSince(bossPlayer.getHitTime());
+        final float timeSinceHit = bossPlayer.getTimeSinceHit();
         final float recoveryTime = 0.2f;
 
         if(timeSinceHit < recoveryTime) {
@@ -98,12 +111,16 @@ public class BossPlayerRenderer implements IRenderer {
         }
 
         batch.setColor(new Color(1, gb, gb, 1));
-        TextureRegion toDraw = animations.get(animation).getKeyFrame(GeneralUtils.secondsSince(startTime));
+        TextureRegion toDraw = animations.get(animation).getKeyFrame(timePassed);
         batch.draw(toDraw, x, bossPlayer.pos.y, w * dir, h);
         batch.setColor(Color.WHITE);
 
         gpDustEffect.draw(batch, Gdx.graphics.getDeltaTime());
 
+        if(bossPlayer.isDashing()) {
+            dashEffect.setPosition(bossPlayer.pos.x + bossPlayer.size.x * (bossPlayer.getDirection() == -1 ? 1 : 0), bossPlayer.pos.y);
+        }
+        dashEffect.draw(batch, Gdx.graphics.getDeltaTime());
     }
 
     @Override

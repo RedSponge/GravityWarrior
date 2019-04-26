@@ -26,7 +26,7 @@ import com.redsponge.upsidedownbb.utils.Settings;
 
 public class BossPlayer extends PActor implements IUpdated, Telegraph {
 
-    public static final AssetDescriptor[] REQUIRED_ASSETS = {Boss.bite, Boss.gpFall, Boss.gpRise, Boss.hit};
+    public static final AssetDescriptor[] REQUIRED_ASSETS = {Boss.bite, Boss.gpFall, Boss.gpRise, Boss.hit, Boss.gpHitGround, Boss.dash};
 
     private InputTranslator input;
     private boolean onGround;
@@ -35,12 +35,12 @@ public class BossPlayer extends PActor implements IUpdated, Telegraph {
     private int direction;
 
     private PunchBox punchBox;
-    private long punchStartTime;
-    private long gpStartTime;
-    private long hitTime;
+    private float punchTimeCounter;
+    private float gpTimeCounter;
+    private float timeSinceHit;
+    private float dashTimeCounter;
 
     private EnemyPlayer enemyPlayer;
-    private long dashStart;
     private StateMachine<BossPlayer, GroundPoundState> groundPoundStateMachine;
     private int health;
 
@@ -49,6 +49,8 @@ public class BossPlayer extends PActor implements IUpdated, Telegraph {
     private Sound biteSound, gpRiseSound;
     private Sound gpFallSound;
     private Sound hitSound;
+    private Sound gpHitGroundSound;
+    private Sound dashSound;
 
     private BossPlayerRenderer renderer;
 
@@ -60,7 +62,7 @@ public class BossPlayer extends PActor implements IUpdated, Telegraph {
         pos.set((int) (Constants.ARENA_WIDTH / 2 - size.x / 2), 100);
 
         vel = new Vector2(0, 0);
-        dashStart = 0;
+        dashTimeCounter = 0;
         direction = 1;
 
         groundPoundStateMachine = new DefaultStateMachine<BossPlayer, GroundPoundState>(this, GroundPoundState.INACTIVE);
@@ -70,8 +72,16 @@ public class BossPlayer extends PActor implements IUpdated, Telegraph {
         gpRiseSound = assets.get(Boss.gpRise);
         gpFallSound = assets.get(Boss.gpFall);
         hitSound = assets.get(Boss.hit);
+        gpHitGroundSound = assets.get(Boss.gpHitGround);
+        dashSound = assets.get(Boss.dash);
 
         health = Constants.BOSS_MAX_HEALTH;
+
+        // Start at 10 to not trigger at the beginning
+        dashTimeCounter = 10;
+        punchTimeCounter = 10;
+        gpTimeCounter = 10;
+        timeSinceHit = 10;
     }
 
     public void setRenderer(BossPlayerRenderer renderer) {
@@ -90,18 +100,23 @@ public class BossPlayer extends PActor implements IUpdated, Telegraph {
             }
             processPunch();
             groundPoundStateMachine.update();
+
+            gpTimeCounter += delta;
+            punchTimeCounter += delta;
+            dashTimeCounter += delta;
         }
+        timeSinceHit += delta;
 
 
         if(!isPunching() && !isGroundPounding()) {
             vel.add(0, Constants.WORLD_GRAVITY);
             if(!containingScreen.isGameFinished()) {
                 vel.x = direction * getSpeed();
-                if (GeneralUtils.secondsSince(dashStart) < 0.2f) {
+                if (isDashing()) {
                     vel.x = direction * 400;
                 }
                 if (input.isJustDashing() && getPercentCooldownForDash() >= 1) {
-                    dashStart = TimeUtils.nanoTime();
+                    beginDash();
                 }
                 if (onGround && input.isJustJumping() && !isGroundPounding() && getPercentCooldownForGroundPound() >= 1) {
                     beginGroundPound();
@@ -125,12 +140,18 @@ public class BossPlayer extends PActor implements IUpdated, Telegraph {
         onGround = collideFirst(pos.copy().add(0, -1)) instanceof Platform;
     }
 
+    private void beginDash() {
+        dashSound.play(Settings.soundVol);
+        dashTimeCounter = 0;
+        renderer.startDash();
+    }
+
     public float getPercentCooldownForPunch() {
-        return GeneralUtils.secondsSince(punchStartTime) / Constants.PUNCH_COOLDOWN;
+        return punchTimeCounter / Constants.PUNCH_COOLDOWN;
     }
 
     public float getPercentCooldownForGroundPound() {
-        return GeneralUtils.secondsSince(gpStartTime) / Constants.GROUND_POUND_COOLDOWN;
+        return gpTimeCounter / Constants.GROUND_POUND_COOLDOWN;
     }
 
     public boolean isGroundPounding() {
@@ -138,7 +159,7 @@ public class BossPlayer extends PActor implements IUpdated, Telegraph {
     }
 
     private void beginGroundPound() {
-        gpStartTime = TimeUtils.nanoTime();
+        gpTimeCounter = 0;
         groundPoundStateMachine.changeState(GroundPoundState.RAISE);
         gpRiseSound.play(Settings.soundVol);
     }
@@ -148,18 +169,18 @@ public class BossPlayer extends PActor implements IUpdated, Telegraph {
 
         this.health -= health;
         hitSound.play(Settings.soundVol);
-        hitTime = TimeUtils.nanoTime();
+        timeSinceHit = 0;
     }
 
     public boolean isPunching() {
-        return GeneralUtils.secondsSince(punchStartTime) < Constants.PUNCH_LENGTH;
+        return punchTimeCounter < Constants.PUNCH_LENGTH;
     }
 
     private void processPunch() {
-        if(isPunching() && GeneralUtils.secondsSince(punchStartTime) > Constants.PUNCH_BOX_DELAY && punchBox == null) {
+        if(isPunching() && punchTimeCounter > Constants.PUNCH_BOX_DELAY && punchBox == null) {
             createPunchBox();
         }
-        if(GeneralUtils.secondsSince(punchStartTime) > Constants.PUNCH_LENGTH && punchBox != null) {
+        if(punchTimeCounter > Constants.PUNCH_LENGTH && punchBox != null) {
             endPunch();
         }
     }
@@ -176,6 +197,10 @@ public class BossPlayer extends PActor implements IUpdated, Telegraph {
         MessageManager.getInstance().dispatchMessage(0, this, enemyPlayer, MessageType.BOSS_PUNCH_BEGIN);
     }
 
+    public Sound getGPHitGroundSound() {
+        return gpHitGroundSound;
+    }
+
     private void endPunch() {
         if(punchBox != null) {
             punchBox.remove();
@@ -184,11 +209,11 @@ public class BossPlayer extends PActor implements IUpdated, Telegraph {
     }
 
     public float getPercentCooldownForDash() {
-        return GeneralUtils.secondsSince(dashStart) / Constants.DASH_COOLDOWN;
+        return dashTimeCounter / Constants.DASH_COOLDOWN;
     }
 
     private void beginPunch() {
-        punchStartTime = TimeUtils.nanoTime();
+        punchTimeCounter = 0;
         biteSound.play(Settings.soundVol);
     }
 
@@ -229,8 +254,8 @@ public class BossPlayer extends PActor implements IUpdated, Telegraph {
         return punchBox;
     }
 
-    public long getPunchStartTime() {
-        return punchStartTime;
+    public float getPunchTimeCounter() {
+        return punchTimeCounter;
     }
 
     public Sound getGPFallSound() {
@@ -245,7 +270,15 @@ public class BossPlayer extends PActor implements IUpdated, Telegraph {
         return health;
     }
 
-    public long getHitTime() {
-        return hitTime;
+    public float getTimeSinceHit() {
+        return timeSinceHit;
+    }
+
+    public GameScreen getContainingScreen() {
+        return containingScreen;
+    }
+
+    public boolean isDashing() {
+        return dashTimeCounter < 0.2f;
     }
 }

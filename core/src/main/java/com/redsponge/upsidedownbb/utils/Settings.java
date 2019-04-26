@@ -9,8 +9,8 @@ public class Settings {
     public static int keyGroundPound;
     public static int keyPunch;
 
-    public static int musicVol;
-    public static int soundVol;
+    public static float musicVol;
+    public static float soundVol;
     public static int keyPause;
 
     public static WinStyle winStyle;

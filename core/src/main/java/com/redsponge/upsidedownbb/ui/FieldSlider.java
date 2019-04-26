@@ -19,7 +19,7 @@ public class FieldSlider extends Slider {
         this.connectedObject = connectedObject;
         try {
             this.connectedField = connectedClass.getField(fieldName);
-            int val = (int) connectedField.get(connectedObject);
+            float val = (float) connectedField.get(connectedObject) / 100;
             setValue(val);
         } catch (NoSuchFieldException | IllegalAccessException e) {
             e.printStackTrace();
@@ -35,13 +35,14 @@ public class FieldSlider extends Slider {
 
     }
 
-    private void setValue(int value) {
+    public boolean setValue(float value) {
         try {
             connectedField.set(connectedObject, value);
-            super.setValue(value);
+            return super.setValue(value);
         } catch (IllegalAccessException e) {
             e.printStackTrace();
             Gdx.app.exit();
         }
+        return true;
     }
 }

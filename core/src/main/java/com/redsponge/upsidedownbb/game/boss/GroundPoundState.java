@@ -1,23 +1,23 @@
 package com.redsponge.upsidedownbb.game.boss;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.ai.fsm.State;
 import com.badlogic.gdx.ai.msg.Telegram;
 import com.badlogic.gdx.math.Interpolation;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.utils.TimeUtils;
 import com.redsponge.upsidedownbb.utils.Constants;
-import com.redsponge.upsidedownbb.utils.GeneralUtils;
 import com.redsponge.upsidedownbb.utils.Logger;
 import com.redsponge.upsidedownbb.utils.Settings;
 
 public enum GroundPoundState implements State<BossPlayer> {
+
     RAISE() {
         private int startY;
         private int wantedX;
         private int startX;
         private Vector2 vel;
         private int wantedY;
-        private long startTime;
+        private float timeCounter;
         private int direction;
 
         @Override
@@ -35,14 +35,15 @@ public enum GroundPoundState implements State<BossPlayer> {
             this.wantedY = 150;
             this.startY = entity.pos.y;
             entity.setDirection(entity.getEnemyPlayer().getRelativePositionFromBossMultiplier());
-            startTime = TimeUtils.nanoTime();
+            timeCounter = 0;
             direction = entity.pos.x < wantedX ? 1 : -1;
         }
 
         @Override
         public void update(BossPlayer entity) {
+            timeCounter += Gdx.graphics.getDeltaTime();
             final int overAllX = Math.abs(startX - wantedX);
-            float progress = GeneralUtils.secondsSince(startTime) / 0.5f;
+            float progress = timeCounter / 0.5f;
             if(progress > 1) progress = 1;
 
             vel.y = 0;
@@ -53,7 +54,7 @@ public enum GroundPoundState implements State<BossPlayer> {
             int toMoveX = Math.abs(neededX - entity.pos.x);
 
             // For GP Raise Debug:
-            //Logger.log(this, "ToMove:",toMoveX, "StartX:",startX, "Interpolated:", Interpolation.circleOut.apply(progress), "Need to be in:",neededX, "Current Pos:",entity.pos.x, "Time Progress:",progress, "Direction:",direction, "FinalX:",overAllX);
+            // Logger.log(this, "ToMove:",toMoveX, "StartX:",startX, "Interpolated:", Interpolation.circleOut.apply(progress), "Need to be in:",neededX, "Current Pos:",entity.pos.x, "Time Progress:",progress, "Direction:",direction, "FinalX:",overAllX);
 
             entity.moveX(toMoveX * direction, null);
             entity.moveY(Math.abs(neededY - entity.pos.y), null);
@@ -82,7 +83,9 @@ public enum GroundPoundState implements State<BossPlayer> {
 
             if(entity.isOnGround()) {
                 entity.getGroundPoundStateMachine().changeState(INACTIVE);
+                entity.getGPHitGroundSound().play(Settings.soundVol);
                 entity.getRenderer().startGPDust();
+                entity.getContainingScreen().setScreenShakes(3);
             }
         }
     },

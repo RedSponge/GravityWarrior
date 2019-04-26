@@ -37,12 +37,17 @@ public class AssetDescBin {
         public static final AssetDescriptor<Sound> gpRise = new AssetDescriptor<Sound>("sounds/boss_gp_rise.wav", Sound.class);
         public static final AssetDescriptor<Sound> gpFall = new AssetDescriptor<Sound>("sounds/boss_gp_fall.wav", Sound.class);
         public static final AssetDescriptor<Sound> hit = new AssetDescriptor<Sound>("sounds/boss_hit.wav", Sound.class);
+        public static final AssetDescriptor<Sound> gpHitGround = new AssetDescriptor<Sound>("sounds/boss_hit_ground.wav", Sound.class);
+        public static final AssetDescriptor<Sound> dash = new AssetDescriptor<Sound>("sounds/boss_dash.wav", Sound.class);
     }
 
     public static final class Enemy {
         public static final AssetDescriptor<TextureAtlas> unpowered = new AssetDescriptor<TextureAtlas>("textures/enemy/unpowered.atlas", TextureAtlas.class);
         public static final AssetDescriptor<TextureAtlas> poweredOverlay = new AssetDescriptor<TextureAtlas>("textures/enemy/powered.atlas", TextureAtlas.class);
+
         public static final AssetDescriptor<Sound> attack = new AssetDescriptor<Sound>("sounds/enemy_attack.wav", Sound.class);
+        public static final AssetDescriptor<Sound> hit = new AssetDescriptor<Sound>("sounds/enemy_hit.wav", Sound.class);
+        public static final AssetDescriptor<Sound> stuck = new AssetDescriptor<Sound>("sounds/enemy_stuck.wav", Sound.class);
     }
 
     public static final class Background {
@@ -54,6 +59,7 @@ public class AssetDescBin {
     public static final class Particles {
         public static final AssetDescriptor<ParticleEffect> dust = new AssetDescriptor<ParticleEffect>("particles/walk_dust.p", ParticleEffect.class);
         public static final AssetDescriptor<ParticleEffect> groundPoundDust = new AssetDescriptor<ParticleEffect>("particles/gp_dust.p", ParticleEffect.class);
+        public static final AssetDescriptor<ParticleEffect> dashStars = new AssetDescriptor<ParticleEffect>("particles/dash_stars.p", ParticleEffect.class);
     }
 
     public static final class Menu {

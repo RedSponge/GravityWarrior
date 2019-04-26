@@ -9,6 +9,7 @@ import com.redsponge.upsidedownbb.game.boss.BossPlayer;
 import com.redsponge.upsidedownbb.utils.Constants;
 import com.redsponge.upsidedownbb.utils.GeneralUtils;
 import com.redsponge.upsidedownbb.utils.Logger;
+import com.redsponge.upsidedownbb.utils.Settings;
 
 public enum GravityAttackState implements State<EnemyPlayer> {
 
@@ -86,7 +87,9 @@ public enum GravityAttackState implements State<EnemyPlayer> {
                         delay = 5;
                         Logger.log(this, "Stuck In Ground!");
                         entity.startHeadStuck();
+                        entity.getContainingScreen().setScreenShakes(3);
                         entity.getVel().set(0, 0);
+                        entity.getStuckSound().play(Settings.soundVol);
                     }
                     MessageManager.getInstance().dispatchMessage(delay, entity, entity, MessageType.PLAYER_FINISHED_GRAVITY);
                     entity.getGravityAttackStateMachine().changeState(INACTIVE);

@@ -9,7 +9,6 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
-import com.badlogic.gdx.utils.TimeUtils;
 import com.redsponge.upsidedownbb.assets.AnimationDescriptor;
 import com.redsponge.upsidedownbb.assets.AssetDescBin.Enemy;
 import com.redsponge.upsidedownbb.assets.AssetDescBin.Particles;
@@ -18,6 +17,7 @@ import com.redsponge.upsidedownbb.assets.IRenderer;
 import com.redsponge.upsidedownbb.utils.Constants;
 import com.redsponge.upsidedownbb.utils.GeneralUtils;
 import com.redsponge.upsidedownbb.utils.Logger;
+import com.redsponge.upsidedownbb.utils.Settings;
 import com.redsponge.upsidedownbb.utils.holders.Pair;
 
 import java.util.HashMap;
@@ -31,20 +31,21 @@ public class EnemyPlayerRenderer implements IRenderer {
 
     private HashMap<String, Pair<Animation<TextureRegion>, Animation<TextureRegion>>> animations;
 
-    private long startTime;
-    private long dabStartTime;
+    private float dabTimeCounter;
     private boolean dabFlip;
+
+    private float timeCounter;
 
     public EnemyPlayerRenderer(EnemyPlayer player, Assets assets) {
         this.player = player;
-        startTime = TimeUtils.nanoTime();
+        timeCounter = 0;
 
         renderWidth = 64/2;
         renderHeight = 96/2;
 
         initAnimation(assets);
         dustEffect = assets.get(Particles.dust);
-        dabStartTime = 0;
+        dabTimeCounter = 0;
         dabFlip = false;
     }
 
@@ -66,16 +67,27 @@ public class EnemyPlayerRenderer implements IRenderer {
         boolean flip = false;
         GravityAttackState gravityAttackState = player.getGravityAttackStateMachine().getCurrentState();
 
+        timeCounter += Gdx.graphics.getDeltaTime();
+
         if(player.getHealth() <= 0) {
             currentAnimation = "fallen";
         } else if(player.getBoss().getHealth() <= 0) {
-            if(dabStartTime == 0 || GeneralUtils.secondsSince(dabStartTime) > animations.get("dab").a.getAnimationDuration() + 1) {
-                dabStartTime = TimeUtils.nanoTime();
-                startTime = dabStartTime;
-                dabFlip = !dabFlip;
+            if(Settings.winStyle == WinStyle.CURSED) {
+                if (dabTimeCounter > animations.get("dab").a.getAnimationDuration() + 1) {
+                    dabTimeCounter = 0;
+                    timeCounter = dabTimeCounter;
+                    dabFlip = !dabFlip;
+                }
+                dabTimeCounter += Gdx.graphics.getDeltaTime();
+                flip = dabFlip;
+                currentAnimation = "dab";
+            } else if(Settings.winStyle == WinStyle.REGULAR) {
+                currentAnimation = "happy_jump";
+            } else {
+                Logger.log(this, "Invalid Win Style:", Settings.winStyle, "EXITING!");
+                Gdx.app.exit();
+                return;
             }
-            flip = dabFlip;
-            currentAnimation = "dab";
         } else if(player.isHeadStuck()) {
             currentAnimation = "head_stuck";
         } else if(!player.hasRecoveredFromHit()) {
@@ -83,13 +95,11 @@ public class EnemyPlayerRenderer implements IRenderer {
             flip = true;
         } else if(player.isAttacking()) {
             currentAnimation = "slice";
-            startTime = player.getAttackStartTime();
+            timeCounter = player.getAttackStartTime();
         } else if(player.isDucking()) {
             currentAnimation = "duck";
             flip = true;
-            if(GeneralUtils.secondsSince(player.getDuckStartTime()) < .01f) {
-                startTime = TimeUtils.nanoTime();
-            }
+            timeCounter = player.getDuckStartTime();
         } else if(gravityAttackState == GravityAttackState.PLUNGING && player.pos.y != Constants.FLOOR_HEIGHT) {
             currentAnimation = "plunging";
         } else if(player.isTouchingWalls() || player.getVel().x == 0) {
@@ -128,9 +138,9 @@ public class EnemyPlayerRenderer implements IRenderer {
 
         batch.setColor(new Color(1, 1, 1, alpha));
         Pair<Animation<TextureRegion>, Animation<TextureRegion>> animationPair = animations.get(currentAnimation);
-        batch.draw(animationPair.a.getKeyFrame(GeneralUtils.secondsSince(startTime)), x, y, w, h);
+        batch.draw(animationPair.a.getKeyFrame(timeCounter), x, y, w, h);
         if(player.isPowered()) {
-            batch.draw(animationPair.b.getKeyFrame(GeneralUtils.secondsSince(startTime)), x, y, w, h);
+            batch.draw(animationPair.b.getKeyFrame(timeCounter), x, y, w, h);
         }
         batch.setColor(Color.WHITE);
     }

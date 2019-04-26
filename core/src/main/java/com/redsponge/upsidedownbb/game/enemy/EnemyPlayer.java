@@ -27,23 +27,29 @@ import com.redsponge.upsidedownbb.utils.Settings;
 
 public class EnemyPlayer extends PActor implements IUpdated, Telegraph {
 
-    public static final AssetDescriptor[] REQUIRED_ASSETS = {Enemy.attack};
+    public static final AssetDescriptor[] REQUIRED_ASSETS = {Enemy.attack, Enemy.hit, Enemy.stuck};
 
     private boolean gravitySwitched;
     private Vector2 vel;
     private BossPlayer boss;
-    private long duckStart;
-    private long attackStart;
+
+    private float duckTimeCounter;
+    private float attackTimeCounter;
+    private float timeSinceHit;
 
     private StateMachine<EnemyPlayer, EnemyPlayerState> stateMachine;
     private StateMachine<EnemyPlayer, GravityAttackState> gravityAttackStateMachine;
-    private long hitTime;
     private boolean onGround;
     private boolean headStuck;
+
     private Sound attackSound;
+    private Sound hitSound;
+    private Sound stuckSound;
 
     private int health;
     private GameScreen containingScreen;
+    private EnemyPlayerRenderer renderer;
+
 
     public EnemyPlayer(PhysicsWorld worldIn, BossPlayer boss, Assets assets, GameScreen containingScreen) {
         super(worldIn);
@@ -59,7 +65,18 @@ public class EnemyPlayer extends PActor implements IUpdated, Telegraph {
         gravityAttackStateMachine = new DefaultStateMachine<EnemyPlayer, GravityAttackState>(this, GravityAttackState.INACTIVE);
 
         attackSound = assets.get(Enemy.attack);
+        hitSound = assets.get(Enemy.hit);
+        stuckSound = assets.get(Enemy.stuck);
+
+        duckTimeCounter = 10;
+        attackTimeCounter = 10;
+        timeSinceHit = 10;
+
         health = Constants.PLAYER_MAX_HEALTH;
+    }
+
+    public void setRenderer(EnemyPlayerRenderer renderer) {
+        this.renderer = renderer;
     }
 
     @Override
@@ -77,6 +94,10 @@ public class EnemyPlayer extends PActor implements IUpdated, Telegraph {
             if (onGround) {
                 vel.x *= 0.9f;
             }
+
+            timeSinceHit += delta;
+            attackTimeCounter += delta;
+            duckTimeCounter += delta;
         }
 
         if(!headStuck) {
@@ -128,7 +149,7 @@ public class EnemyPlayer extends PActor implements IUpdated, Telegraph {
 
     public void startDuck() {
         size.y = Constants.PLAYER_DUCK_HEIGHT;
-        duckStart = TimeUtils.nanoTime();
+        duckTimeCounter = 0;
     }
 
     public void endDuck() {
@@ -146,7 +167,7 @@ public class EnemyPlayer extends PActor implements IUpdated, Telegraph {
     }
 
     public void processDuck() {
-        if(GeneralUtils.secondsSince(duckStart) > 0.5f) {
+        if(duckTimeCounter > 0.5f) {
             endDuck();
         }
     }
@@ -161,13 +182,13 @@ public class EnemyPlayer extends PActor implements IUpdated, Telegraph {
 
     public void attackBoss() {
         Logger.log(this, "Attacked Boss!");
-        attackStart = TimeUtils.nanoTime();
+        attackTimeCounter = 0;
         attackSound.play(Settings.soundVol);
         boss.attacked(Constants.REGULAR_HIT_DAMAGE);
     }
 
     public boolean isAttacking() {
-        return GeneralUtils.secondsSince(attackStart) < Constants.SLICE_LENGTH;
+        return attackTimeCounter < Constants.SLICE_LENGTH;
     }
 
     public int getHealth() {
@@ -194,26 +215,23 @@ public class EnemyPlayer extends PActor implements IUpdated, Telegraph {
 
     public void attacked(int health) {
         attacked(false, health);
-        addHealth(-health);
     }
 
     public void attacked(boolean bypassInvincibility, int health) {
         if(hasRecoveredFromHit() || bypassInvincibility) {
             knockBack();
-            hitTime = TimeUtils.nanoTime();
+            timeSinceHit = 0;
             gravitySwitched = false;
             headStuck = false;
             gravityAttackStateMachine.changeState(GravityAttackState.INACTIVE);
             stateMachine.changeState(EnemyPlayerState.GOT_HIT);
+            hitSound.play(Settings.soundVol);
         }
-    }
-
-    public void addHealth(int health) {
         this.health -= health;
     }
 
     public boolean hasRecoveredFromHit() {
-        return GeneralUtils.secondsSince(hitTime) > 1;
+        return timeSinceHit > 1;
     }
 
     public boolean isTouchingWalls() {
@@ -221,7 +239,7 @@ public class EnemyPlayer extends PActor implements IUpdated, Telegraph {
     }
 
     public boolean isDucking() {
-        return GeneralUtils.secondsSince(duckStart) < 0.5f;
+        return duckTimeCounter < 0.5f;
     }
 
     public void startGravityAttack() {
@@ -266,7 +284,7 @@ public class EnemyPlayer extends PActor implements IUpdated, Telegraph {
     }
 
     public void startHeadStuck() {
-        hitTime = TimeUtils.nanoTime();
+        timeSinceHit = 0;
         headStuck = true;
     }
 
@@ -275,22 +293,30 @@ public class EnemyPlayer extends PActor implements IUpdated, Telegraph {
     }
 
     public boolean isHeadStuck() {
-        return gravityAttackStateMachine.getCurrentState() == GravityAttackState.INACTIVE && headStuck;
+        return headStuck;
     }
 
-    public long getDuckStartTime() {
-        return duckStart;
+    public float getDuckStartTime() {
+        return duckTimeCounter;
     }
 
-    public long getAttackStartTime() {
-        return attackStart;
+    public float getAttackStartTime() {
+        return attackTimeCounter;
     }
 
-    public long getHitTime() {
-        return hitTime;
+    public float getTimeSinceHit() {
+        return timeSinceHit;
     }
 
     public boolean isGravitySwitched() {
         return gravitySwitched;
+    }
+
+    public GameScreen getContainingScreen() {
+        return containingScreen;
+    }
+
+    public Sound getStuckSound() {
+        return stuckSound;
     }
 }
