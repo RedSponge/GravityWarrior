@@ -90,7 +90,7 @@ public class EnemyPlayerRenderer implements IRenderer {
             if(GeneralUtils.secondsSince(player.getDuckStartTime()) < .01f) {
                 startTime = TimeUtils.nanoTime();
             }
-        } else if(gravityAttackState == GravityAttackState.PLUNGING) {
+        } else if(gravityAttackState == GravityAttackState.PLUNGING && player.pos.y != Constants.FLOOR_HEIGHT) {
             currentAnimation = "plunging";
         } else if(player.isTouchingWalls() || player.getVel().x == 0) {
             currentAnimation = "idle";

@@ -21,8 +21,8 @@ public class Settings {
         keyPunch = Keys.Z;
         keyPause = Keys.ESCAPE;
 
-        musicVol = 50;
-        soundVol = 50;
+        musicVol = 0;
+        soundVol = 0;
 
         winStyle = WinStyle.REGULAR;
     }

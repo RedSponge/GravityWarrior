@@ -79,11 +79,17 @@ public class EnemyPlayer extends PActor implements IUpdated, Telegraph {
             }
         }
 
-        moveY(vel.y * delta, null);
+        if(!headStuck) {
+            moveY(vel.y * delta, null);
 
-        if(containingScreen.isGameFinished()) vel.x = 0;
+            if (containingScreen.isGameFinished()) vel.x = 0;
 
-        moveX(vel.x * delta, () -> {if(!hasRecoveredFromHit()) {vel.x *= -1;}});
+            moveX(vel.x * delta, () -> {
+                if (!hasRecoveredFromHit()) {
+                    vel.x *= -1;
+                }
+            });
+        }
 
         onGround = collideFirst(pos.copy().add(0, -1)) instanceof Platform
         || collideFirst(pos.copy().add(0, size.y + 1)) instanceof Platform;
@@ -96,8 +102,8 @@ public class EnemyPlayer extends PActor implements IUpdated, Telegraph {
                 }
             }
 
-            if (hasRecoveredFromHit() && !isAttacking()) ;
-            stateMachine.update();
+            if (hasRecoveredFromHit() && !isAttacking() && !headStuck)
+                stateMachine.update();
         }
     }
 
@@ -182,6 +188,7 @@ public class EnemyPlayer extends PActor implements IUpdated, Telegraph {
 
     public void attacked(int health) {
         attacked(false, health);
+        addHealth(-health);
     }
 
     public void attacked(boolean bypassInvincibility, int health) {
@@ -192,8 +199,11 @@ public class EnemyPlayer extends PActor implements IUpdated, Telegraph {
             headStuck = false;
             gravityAttackStateMachine.changeState(GravityAttackState.INACTIVE);
             stateMachine.changeState(EnemyPlayerState.GOT_HIT);
-            this.health -= health;
         }
+    }
+
+    public void addHealth(int health) {
+        this.health -= health;
     }
 
     public boolean hasRecoveredFromHit() {
@@ -272,5 +282,9 @@ public class EnemyPlayer extends PActor implements IUpdated, Telegraph {
 
     public long getHitTime() {
         return hitTime;
+    }
+
+    public boolean isGravitySwitched() {
+        return gravitySwitched;
     }
 }

@@ -17,25 +17,29 @@ public enum GroundPoundState implements State<BossPlayer> {
         private Vector2 vel;
         private int wantedY;
         private long startTime;
+        private int direction;
 
         @Override
         public void enter(BossPlayer entity) {
             super.enter(entity);
             this.wantedX = entity.getEnemyPlayer().pos.x - entity.size.x / 2;
             this.startX = entity.pos.x;
+
             if(Math.abs(wantedX - startX) > Constants.MAX_GROUND_POUND_DISTANCE) {
+                Logger.log(this, "Too Far!");
                 wantedX = (int) (startX + Constants.MAX_GROUND_POUND_DISTANCE * Math.signum(wantedX - startX));
             }
+
             this.vel = entity.getVel();
             this.wantedY = 150;
             this.startY = entity.pos.y;
             entity.setDirection(entity.getEnemyPlayer().getRelativePositionFromBossMultiplier());
             startTime = TimeUtils.nanoTime();
+            direction = entity.pos.x < wantedX ? 1 : -1;
         }
 
         @Override
         public void update(BossPlayer entity) {
-            final int direction = (entity.pos.x < wantedX ? 1 : -1);
             final int overAllX = Math.abs(startX - wantedX);
             float progress = GeneralUtils.secondsSince(startTime) / 0.5f;
             if(progress > 1) progress = 1;
@@ -45,14 +49,12 @@ public enum GroundPoundState implements State<BossPlayer> {
 
             int neededY = startY + (int) (Interpolation.circleOut.apply(progress) * wantedY);
             int neededX = startX + (int) (Interpolation.circleOut.apply(progress) * overAllX) * direction;
-
             int toMoveX = Math.abs(neededX - entity.pos.x);
-            if(toMoveX > 100) {
-                Logger.log(this, toMoveX, neededX, entity.pos.x, progress, direction, overAllX);
-            }
+
+            Logger.log(this, "ToMove:",toMoveX, "StartX:",startX, "Interpolated:", Interpolation.circleOut.apply(progress), "Need to be in:",neededX, "Current Pos:",entity.pos.x, "Time Progress:",progress, "Direction:",direction, "FinalX:",overAllX);
+
             entity.moveX(toMoveX * direction, null);
             entity.moveY(Math.abs(neededY - entity.pos.y), null);
-
 
             if(progress >= 1) {
                 entity.getGroundPoundStateMachine().changeState(FALL);
@@ -73,10 +75,6 @@ public enum GroundPoundState implements State<BossPlayer> {
         @Override
         public void update(BossPlayer entity) {
 
-            if(entity.isGroundPounding() && entity.getEnemyPlayer().isTouchingEnemy()) {
-                entity.getEnemyPlayer().attacked(20);
-            }
-
             vel.y += -100;
             vel.x = 0;
 
@@ -93,6 +91,9 @@ public enum GroundPoundState implements State<BossPlayer> {
     GLOBAL() {
         @Override
         public void update(BossPlayer entity) {
+            if(entity.isGroundPounding() && entity.getEnemyPlayer().isTouchingEnemy()) {
+                entity.getEnemyPlayer().attacked(20);
+            }
         }
     }
     ;

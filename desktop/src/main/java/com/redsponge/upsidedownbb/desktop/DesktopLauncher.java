@@ -3,7 +3,7 @@ package com.redsponge.upsidedownbb.desktop;
 import com.badlogic.gdx.Files.FileType;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplication;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
-import com.redsponge.upsidedownbb.BossBattle;
+import com.redsponge.upsidedownbb.GravityFighter;
 
 /** Launches the desktop (LWJGL) application. */
 public class DesktopLauncher {
@@ -12,7 +12,7 @@ public class DesktopLauncher {
     }
 
     private static LwjglApplication createApplication() {
-        return new LwjglApplication(new BossBattle(), getDefaultConfiguration());
+        return new LwjglApplication(new GravityFighter(), getDefaultConfiguration());
     }
 
     private static LwjglApplicationConfiguration getDefaultConfiguration() {

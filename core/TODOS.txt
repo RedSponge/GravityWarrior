@@ -11,9 +11,22 @@ Boss:
 
  - ** Actual Options Menu! **
    - Keybinds V
-   - Volume - Need to connect to fields
-   - Accessible from pause
+   - Volume - V
+   - Accessible from pause V
+
+- Custom win animation needs to be connected
 
  - Tutorial Text
 
  - NOT HAPPENING: MAYBE ADD A SMALL PLATFORMING SECTION TO INTRODUCE THE CHARACTER
+
+ KNOWN BUGS:
+  - Boss snaps back when doing a ground pound - Fixed Until Refound! V
+
+  - Player sometimes gets out of ground when still stunned V
+
+  - Regular punch doesn't work
+
+  - Ground pound sometimes doesn't work (doesn't show particles and doesn't damage)
+
+  - Ground pound grunts even when sound is 0

@@ -52,14 +52,15 @@ public class Constants {
     public static final float GUI_WIDTH = 320;
     public static final float GUI_HEIGHT = 240;
 
-    public static final float PUNCH_COOLDOWN = 2;
-    public static final float DASH_COOLDOWN = 1;
-    public static final float GROUND_POUND_COOLDOWN = 10;
+    public static final float PUNCH_COOLDOWN = 0;
+    public static final float DASH_COOLDOWN = 0;
+    public static final float GROUND_POUND_COOLDOWN = 0;
 
     public static final int MAX_GROUND_POUND_DISTANCE = 200;
     public static final float PUNCH_BOX_DELAY = 0.3f;
-    public static final int BOSS_MAX_HEALTH = 10;
-    public static final int PLAYER_MAX_HEALTH = 200;
+
+    public static final int BOSS_MAX_HEALTH = 100000;
+    public static final int PLAYER_MAX_HEALTH = 10000;
     public static final int REGULAR_HIT_DAMAGE = 10;
     public static final int PLUNGE_ATTACK_DAMAGE = 20;
 

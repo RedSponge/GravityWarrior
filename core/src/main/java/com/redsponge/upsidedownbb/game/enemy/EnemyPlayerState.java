@@ -13,7 +13,7 @@ public enum EnemyPlayerState implements State<EnemyPlayer> {
         public void update(EnemyPlayer entity) {
             entity.moveAwayFromBoss();
             if(MathUtils.randomBoolean(1) && (entity.distanceFromBoss() > 100 || entity.isTouchingWalls())) {
-                if(MathUtils.randomBoolean()) {
+                if(MathUtils.randomBoolean() || true) {
                     entity.getStateMachine().changeState(SUPER_ATTACK_FROM_TOP);
                 } else {
                     entity.getStateMachine().changeState(RUN_TO_ATTACK);
@@ -81,7 +81,11 @@ public enum EnemyPlayerState implements State<EnemyPlayer> {
     GOT_HIT() {
         @Override
         public void enter(EnemyPlayer entity) {
-            entity.attacked(10);
+            entity.addHealth(-10);
+            if(entity.isOnGround() && entity.pos.x > 100) {
+                entity.getVel().y = 0;
+            }
+            entity.setGravitySwitched(false);
         }
 
         @Override
