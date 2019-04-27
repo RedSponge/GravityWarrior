@@ -11,6 +11,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
+import com.badlogic.gdx.utils.TimeUtils;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.rafaskoberg.gdx.typinglabel.TypingAdapter;
 import com.rafaskoberg.gdx.typinglabel.TypingLabel;
@@ -43,6 +44,8 @@ public class IntroScreen extends AbstractScreen implements InputProcessor {
     private TypingLabel textDisplay;
     private int stateIndex;
     private boolean done;
+
+    private long startTime;
 
     private Music backgroundMusic;
 
@@ -107,6 +110,8 @@ public class IntroScreen extends AbstractScreen implements InputProcessor {
         backgroundMusic.setLooping(true);
         backgroundMusic.setVolume(Settings.musicVol);
         backgroundMusic.play();
+
+        startTime = TimeUtils.nanoTime();
     }
 
     @Override
@@ -177,6 +182,7 @@ public class IntroScreen extends AbstractScreen implements InputProcessor {
 
     @Override
     public boolean keyDown(int keycode) {
+        if(GeneralUtils.secondsSince(startTime) < 1) return false;
         if(textDisplay.hasEnded()) {
             stateIndex++;
             try {
