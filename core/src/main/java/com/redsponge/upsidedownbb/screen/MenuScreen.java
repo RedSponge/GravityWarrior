@@ -26,6 +26,7 @@ import com.redsponge.upsidedownbb.assets.AssetDescBin.Background;
 import com.redsponge.upsidedownbb.assets.AssetDescBin.Menu;
 import com.redsponge.upsidedownbb.assets.AssetDescBin.Skins;
 import com.redsponge.upsidedownbb.game.enemy.WinStyle;
+import com.redsponge.upsidedownbb.transitions.TransitionTemplate;
 import com.redsponge.upsidedownbb.transitions.TransitionTemplates;
 import com.redsponge.upsidedownbb.ui.FieldSlider;
 import com.redsponge.upsidedownbb.ui.KeySelector;
@@ -85,7 +86,12 @@ public class MenuScreen extends AbstractScreen {
         start.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                ga.transitionTo(new GameScreen(ga), TransitionTemplates.sineSlide(1));
+                if(Settings.sawIntro) {
+                    ga.transitionTo(new GameScreen(ga), TransitionTemplates.sineSlide(1));
+                } else {
+                    ga.transitionTo(new IntroScreen(ga), TransitionTemplates.sineSlide(1));
+                    Settings.sawIntro = true;
+                }
             }
         });
 

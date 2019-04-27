@@ -54,6 +54,7 @@ public class AssetDescBin {
         public static final AssetDescriptor<Texture> arena = new AssetDescriptor<Texture>("textures/background/arena.png", Texture.class);
         public static final AssetDescriptor<Texture> sky = new AssetDescriptor<Texture>("textures/background/sky.png", Texture.class);
         public static final AssetDescriptor<Texture> menuSky = new AssetDescriptor<Texture>("textures/menu/menu_sky.png", Texture.class);
+        public static final AssetDescriptor<Texture> desert = new AssetDescriptor<Texture>("textures/background/desert.png", Texture.class);
     }
 
     public static final class Particles {

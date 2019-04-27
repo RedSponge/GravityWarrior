@@ -14,6 +14,11 @@ public class Settings {
     public static int keyPause;
 
     public static WinStyle winStyle;
+    public static String playerName;
+
+    public static boolean knowsPowers;
+    public static boolean knowsHowToMove;
+    public static boolean sawIntro;
 
     public static void setDefaults() {
         keyDash = Keys.SHIFT_LEFT;
@@ -23,6 +28,11 @@ public class Settings {
 
         musicVol = 0;
         soundVol = 0;
+        playerName = "Bobby";
+
+        knowsPowers = false;
+        knowsHowToMove = false;
+        sawIntro = false;
 
         winStyle = WinStyle.REGULAR;
     }

@@ -266,6 +266,10 @@ public class GameScreen extends AbstractScreen implements InputProcessor {
             return;
         }
 
+        if(!Settings.knowsHowToMove || !Settings.knowsPowers) {
+            return;
+        }
+
         if((boss.getHealth() <= 0 || enemyPlayer.getHealth() <= 0) && !gameFinished) {
             gameFinished = true;
             backgroundMusic.stop();
@@ -391,6 +395,11 @@ public class GameScreen extends AbstractScreen implements InputProcessor {
             drawnText = "You Lost!";
         } else if(enemyPlayer.getHealth() <= 0) {
             drawnText = "You Won!";
+        } else if(!Settings.knowsHowToMove){
+            drawnText = "Welcome! Click anywhere to make the boss move!";
+        }  else if(!Settings.knowsPowers) {
+            drawnText = "Up in the top left corner are your powers!\n(use ESC to see & change controls)\nyour mission is to defeat " + Settings.playerName + ". Good Luck!" +
+                    "\npress any key to continue";
         } else {
             drawnText = null;
         }
@@ -428,6 +437,11 @@ public class GameScreen extends AbstractScreen implements InputProcessor {
                     shapeRenderer.rect(powerStartMargin + i * (power.getRegionWidth() + powerSpacing), 200, power.getRegionWidth(), power.getRegionHeight() * (1 - percent));
                 }
             }
+
+            if(drawnText != null) {
+                shapeRenderer.setColor(new Color(0, 0, 0, 0.5f));
+                shapeRenderer.rect(0, 150 - layout.height - 5, guiViewport.getWorldWidth(), layout.height + 10);
+            }
         } else if(layout != null) {
             shapeRenderer.setColor(new Color(0, 0, 0, 0.5f));
             shapeRenderer.rect(0, 150 - layout.height - 5, guiViewport.getWorldWidth(), layout.height + 10);
@@ -435,7 +449,20 @@ public class GameScreen extends AbstractScreen implements InputProcessor {
         } else {
             Logger.log(this, "You shouldn't reach this place! PLACE: The last else in renderGUI using shapeRenderer");
         }
+
         shapeRenderer.end();
+
+        if(drawnText != null) {
+            guiViewport.apply();
+            batch.setProjectionMatrix(guiViewport.getCamera().combined);
+
+            batch.begin();
+            font.setColor(new Color(1, 1, 1, 1));
+            font.getData().setScale(0.5f);
+            font.draw(batch, drawnText, guiViewport.getWorldWidth() / 2 - layout.width / 4, 150);
+
+            batch.end();
+        }
 
         if(paused) {
             overlayViewport.apply();
@@ -445,6 +472,7 @@ public class GameScreen extends AbstractScreen implements InputProcessor {
             shapeRenderer.rect(0, 0, 1, 1);
             shapeRenderer.end();
         }
+
         Gdx.gl.glDisable(GL20.GL_BLEND);
 
 
@@ -502,7 +530,10 @@ public class GameScreen extends AbstractScreen implements InputProcessor {
         if(gameFinished) {
             ga.transitionTo(new MenuScreen(ga), TransitionTemplates.sineSlide(1));
         } else {
-            if(keycode == Settings.keyPause) {
+            if(!Settings.knowsPowers && Settings.knowsHowToMove) {
+                Settings.knowsPowers = true;
+            }
+            else if(keycode == Settings.keyPause) {
                 togglePause();
             }
         }
@@ -523,6 +554,7 @@ public class GameScreen extends AbstractScreen implements InputProcessor {
     public boolean touchDown(int screenX, int screenY, int pointer, int button) {
         int x = (int) gameViewport.unproject(new Vector2(screenX, screenY)).x;
         boss.setDirection((int) Math.signum(x - boss.pos.x));
+        Settings.knowsHowToMove = true;
         return false;
     }
 
