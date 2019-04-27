@@ -50,7 +50,7 @@ public enum GravityAttackState implements State<EnemyPlayer> {
 
         @Override
         public void update(EnemyPlayer entity) {
-            vel.x =- entity.getRelativePositionFromBossMultiplier() * 400;
+            vel.x =- entity.getRelativePositionFromBossMultiplier() * 200;
             if(Math.abs((entity.pos.x + entity.size.x /2f)-(entity.getBoss().pos.x + entity.getBoss().size.x /2f)) < 2){
                 vel.x = 0;
                 vel.y = 0;

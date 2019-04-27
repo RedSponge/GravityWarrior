@@ -512,8 +512,8 @@ public class GameScreen extends AbstractScreen implements InputProcessor {
 
     @Override
     public void dispose() {
-        pdr.dispose();
         backgroundMusic.dispose();
+        pdr.dispose();
     }
 
     @Override
@@ -540,6 +540,7 @@ public class GameScreen extends AbstractScreen implements InputProcessor {
             } else {
                 ga.transitionTo(new MenuScreen(ga), TransitionTemplates.sineSlide(1));
             }
+            backgroundMusic.dispose();
             Gdx.input.setInputProcessor(null);
         } else {
             if(!Settings.knowsPowers && Settings.knowsHowToMove) {
