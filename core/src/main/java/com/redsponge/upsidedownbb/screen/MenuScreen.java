@@ -2,6 +2,7 @@ package com.redsponge.upsidedownbb.screen;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.assets.AssetDescriptor;
+import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
@@ -17,11 +18,13 @@ import com.badlogic.gdx.scenes.scene2d.ui.SelectBox;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
+import com.badlogic.gdx.scenes.scene2d.ui.TextField;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.viewport.FitViewport;
+import com.redsponge.upsidedownbb.GravityWarrior;
 import com.redsponge.upsidedownbb.assets.AssetDescBin.Background;
 import com.redsponge.upsidedownbb.assets.AssetDescBin.Menu;
 import com.redsponge.upsidedownbb.assets.AssetDescBin.Skins;
@@ -33,6 +36,7 @@ import com.redsponge.upsidedownbb.ui.KeySelector;
 import com.redsponge.upsidedownbb.ui.KeySelectorGroup;
 import com.redsponge.upsidedownbb.utils.Constants;
 import com.redsponge.upsidedownbb.utils.GameAccessor;
+import com.redsponge.upsidedownbb.utils.GeneralUtils;
 import com.redsponge.upsidedownbb.utils.Settings;
 
 public class MenuScreen extends AbstractScreen {
@@ -50,12 +54,18 @@ public class MenuScreen extends AbstractScreen {
 
     private boolean titleLoaded;
 
+    private Music backgroundMusic;
+
     public MenuScreen(GameAccessor ga) {
         super(ga);
     }
 
     @Override
     public void show() {
+        GravityWarrior.discord.setPresenceState("");
+        GravityWarrior.discord.setPresenceDetails("In a menu");
+        GravityWarrior.discord.updatePresence();
+
         sky = assets.get(Background.menuSky);
         Texture titleT = assets.get(Menu.title);
 
@@ -73,15 +83,25 @@ public class MenuScreen extends AbstractScreen {
         pendingMenuLayout = this::setupMenuButtons;
 
         Gdx.input.setInputProcessor(stage);
+        backgroundMusic = Gdx.audio.newMusic(Gdx.files.internal("music/welcome_warrior.ogg"));
+        backgroundMusic.setLooping(true);
+        backgroundMusic.setVolume(Settings.musicVol);
+        backgroundMusic.play();
     }
 
     public void setupMenuButtons() {
         Button start = getButton(skin, "Start");
+        Button intro = getButton(skin, "Intro");
         Button options = getButton(skin, "Options");
         Button customizing = getButton(skin, "Customizables");
+        Button credits = getButton(skin, "Credits");
         Button exit = getButton(skin, "Exit");
 
-        setupEnterActions(180, titleLoaded ? 0 : 1.5f, start, options, customizing, exit);
+        if(!Settings.sawIntro) {
+            setupEnterActions(230, titleLoaded ? 0 : 1.5f, start, options, customizing, credits, exit);
+        } else {
+            setupEnterActions(260, titleLoaded ? 0 : 1.5f, start, intro, options, customizing, credits, exit);
+        }
 
         start.addListener(new ClickListener() {
             @Override
@@ -92,6 +112,15 @@ public class MenuScreen extends AbstractScreen {
                     ga.transitionTo(new IntroScreen(ga), TransitionTemplates.sineSlide(1));
                     Settings.sawIntro = true;
                 }
+                Gdx.input.setInputProcessor(null);
+            }
+        });
+
+        intro.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                ga.transitionTo(new IntroScreen(ga), TransitionTemplates.sineSlide(1));
+                Gdx.input.setInputProcessor(null);
             }
         });
 
@@ -111,12 +140,44 @@ public class MenuScreen extends AbstractScreen {
             }
         });
 
+        credits.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                clearStage();
+                pendingMenuLayout = MenuScreen.this::setupCredits;
+            }
+        });
+
         exit.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 Gdx.app.exit();
             }
         });
+    }
+
+    private void setupCredits() {
+        Button back = getBackButton(skin, this::setupMenuButtons);
+
+        Table art = getTitledActor("Art: ", new Label("RedSponge", skin));
+        Table music = getTitledActor("Music: ", new Label("RedSponge", skin));
+        Table programming = getTitledActor("Programming: ", new Label("RedSponge", skin));
+        Table programs = getTitledActor("Tools Used:", new Label("Audacity, BFXR, Bosca Ceoil, Aseprite, and The LibGDX Skin Composer", skin));
+        Label heart = new Label(GeneralUtils.randomItem(Constants.RANDOM_CREDIT_MESSAGES), skin);
+        setupEnterActions(150, 0, art, music, programming, programs, heart, back);
+    }
+
+    private Table getTitledActor(String title, Actor actor) {
+        Label l = new Label(title, skin);
+        l.setFontScale(0.8f);
+        Table out = new Table();
+        if(actor instanceof Label) {
+            ((Label) actor).setFontScale(0.8f);
+        }
+        out.add(l).padRight(10);
+        out.add(actor).padLeft(10);
+        out.pack();
+        return out;
     }
 
     private void setupOptionButtons() {
@@ -178,9 +239,24 @@ public class MenuScreen extends AbstractScreen {
         winStyles.add(winStylesSB).pad(10);
         winStyles.pack();
 
+        Table playerName = new Table();
+        Label playerNameL = new Label("Player Name:", skin);
+        TextField playerNameF = new TextField(Settings.playerName, skin);
+
+        playerNameF.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                Settings.playerName = playerNameF.getText();
+            }
+        });
+
+        playerName.add(playerNameL).padRight(10);
+        playerName.add(playerNameF).padLeft(10);
+
+        playerName.pack();
         Button back = getBackButton(skin, this::setupMenuButtons);
 
-        setupEnterActions(150, 0, winStyles, back);
+        setupEnterActions(180, 0, winStyles, playerName, back);
     }
 
     @SuppressWarnings("SameParameterValue")
@@ -234,6 +310,7 @@ public class MenuScreen extends AbstractScreen {
 
     @Override
     public void tick(float delta) {
+        backgroundMusic.setVolume(Settings.musicVol / 100f);
         xSkyOffset += delta * 20;
         if(xSkyOffset > sky.getWidth()) {
             xSkyOffset -= sky.getWidth();
@@ -273,6 +350,7 @@ public class MenuScreen extends AbstractScreen {
     @Override
     public void dispose() {
         stage.dispose();
+        backgroundMusic.dispose();
     }
 
     @Override

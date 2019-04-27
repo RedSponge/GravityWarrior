@@ -4,6 +4,7 @@ import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.utils.TimeUtils;
 import com.redsponge.upsidedownbb.assets.AnimationDescriptor;
 
@@ -70,5 +71,28 @@ public class GeneralUtils {
 
     public static void playSoundRandomlyPitched(Sound sound, float vol) {
         sound.play(vol, 0.5f + random.nextFloat(), 0);
+    }
+
+    public static String getCurrentUserName() {
+        try {
+            return System.getProperty("user.name");
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    public static <T> T randomItem(T[] arr) {
+        return arr[MathUtils.random(arr.length - 1)];
+    }
+
+    public static String capitalizeWord(String str){
+        String words[]=str.split("\\s");
+        String capitalizeWord="";
+        for(String w:words){
+            String first=w.substring(0,1);
+            String afterfirst=w.substring(1);
+            capitalizeWord+=first.toUpperCase()+afterfirst+" ";
+        }
+        return capitalizeWord.trim();
     }
 }

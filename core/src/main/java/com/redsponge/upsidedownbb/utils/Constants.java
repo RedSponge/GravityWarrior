@@ -58,11 +58,14 @@ public class Constants {
     public static final int MAX_GROUND_POUND_DISTANCE = 200;
     public static final float PUNCH_BOX_DELAY = 0.3f;
 
-    public static final int BOSS_MAX_HEALTH = 10;
-    public static final int PLAYER_MAX_HEALTH = 10000;
+    public static final int BOSS_MAX_HEALTH = 200;
+    public static final int PLAYER_MAX_HEALTH = 200;
     public static final int REGULAR_HIT_DAMAGE = 10;
     public static final int PLUNGE_ATTACK_DAMAGE = 20;
 
     public static final int BOSS_BAR_COLOR = 0xFF4C4C00;
     public static final int PLAYER_BAR_COLOR = 0x00FAFF00;
+
+    public static final String[] RANDOM_PLAYER_NAMES = {"Bobby", "Eran", "God", "Xx_SuperHackerMan_xX", "A Random Name", "Mike", "Peanut", "Zebra", "Bamboo", "BadLogic", "LibGDXJam7"};
+    public static final String[] RANDOM_CREDIT_MESSAGES = {"We did it boiz!", "LibGDX Is awesome", "I really do want a shawarma", "<3", "Peanut butter and jelly is a good combination", ":D", "Now in 2D", "Supercalifragilisticexpialidocious", "Please Note: This is a random message."};
 }

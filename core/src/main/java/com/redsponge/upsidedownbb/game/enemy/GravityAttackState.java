@@ -75,7 +75,7 @@ public enum GravityAttackState implements State<EnemyPlayer> {
                 hit = true;
                 entity.knockBack();
                 Logger.log(this, "Hit Enemy With Plunge!");
-                entity.getBoss().attacked(Constants.PLUNGE_ATTACK_DAMAGE);
+                entity.getBoss().attacked(Constants.PLUNGE_ATTACK_DAMAGE, false);
             }
 
             if(entity.pos.y < 300) {

@@ -3,6 +3,7 @@ package com.redsponge.upsidedownbb.screen;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.assets.AssetDescriptor;
+import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
@@ -13,6 +14,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.rafaskoberg.gdx.typinglabel.TypingAdapter;
 import com.rafaskoberg.gdx.typinglabel.TypingLabel;
+import com.redsponge.upsidedownbb.GravityWarrior;
 import com.redsponge.upsidedownbb.assets.AssetDescBin.Background;
 import com.redsponge.upsidedownbb.assets.AssetDescBin.Skins;
 import com.redsponge.upsidedownbb.game.intro.IntroEnemy;
@@ -42,12 +44,18 @@ public class IntroScreen extends AbstractScreen implements InputProcessor {
     private int stateIndex;
     private boolean done;
 
+    private Music backgroundMusic;
+
     public IntroScreen(GameAccessor ga) {
         super(ga);
     }
 
     @Override
     public void show() {
+        GravityWarrior.discord.setPresenceState("Starting Soon...");
+        GravityWarrior.discord.setPresenceDetails("Prepping for the battle");
+        GravityWarrior.discord.updatePresence();
+
         viewport = new FitViewport(Constants.GAME_WIDTH, Constants.GAME_HEIGHT);
         textViewport = new FitViewport(Constants.GAME_WIDTH, Constants.GAME_HEIGHT);
 
@@ -94,6 +102,11 @@ public class IntroScreen extends AbstractScreen implements InputProcessor {
         stage.addActor(textDisplay);
 
         Gdx.input.setInputProcessor(this);
+
+        backgroundMusic = Gdx.audio.newMusic(Gdx.files.internal("music/prepare_to_fight.ogg"));
+        backgroundMusic.setLooping(true);
+        backgroundMusic.setVolume(Settings.musicVol);
+        backgroundMusic.play();
     }
 
     @Override
@@ -121,8 +134,6 @@ public class IntroScreen extends AbstractScreen implements InputProcessor {
         batch.draw(desert, 0, 0);
         batch.end();
 
-        pdr.render(world, viewport.getCamera().combined);
-
         textViewport.apply();
         shapeRenderer.setProjectionMatrix(textViewport.getCamera().combined);
 
@@ -142,11 +153,13 @@ public class IntroScreen extends AbstractScreen implements InputProcessor {
     @Override
     public void hide() {
         Gdx.input.setInputProcessor(null);
+        backgroundMusic.stop();
     }
 
     @Override
     public void dispose() {
         pdr.dispose();
+        backgroundMusic.dispose();
     }
 
     @Override
@@ -170,6 +183,7 @@ public class IntroScreen extends AbstractScreen implements InputProcessor {
                 textDisplay.restart(IntroState.values()[stateIndex].getCaption());
             } catch (IndexOutOfBoundsException e) {
                 ga.transitionTo(new GameScreen(ga), TransitionTemplates.sineSlide(1));
+                Gdx.input.setInputProcessor(null);
             }
         } else {
             textDisplay.skipToTheEnd();

@@ -86,13 +86,13 @@ public class BossPlayerRenderer implements IRenderer {
         if(bossPlayer.getEnemyPlayer().getHealth() <= 0) {
             animation = "laugh";
         }
+        else if(bossPlayer.getHealth() <= 0) {
+            animation = "defeated";
+        }
         else if(bossPlayer.isPunching()) {
             animation = "punch";
             timePassed = bossPlayer.getPunchTimeCounter();
             w = 256;
-        }
-        else if(bossPlayer.getHealth() <= 0) {
-            animation = "defeated";
         }
 
         if(bossPlayer.isOnGround() && bossPlayer.getHealth() > 0) {

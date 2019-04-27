@@ -11,7 +11,7 @@ import com.redsponge.upsidedownbb.utils.Settings;
 
 public enum GroundPoundState implements State<BossPlayer> {
 
-    RAISE() {
+    RISE() {
         private int startY;
         private int wantedX;
         private int startX;
@@ -24,6 +24,7 @@ public enum GroundPoundState implements State<BossPlayer> {
         public void enter(BossPlayer entity) {
             super.enter(entity);
             this.wantedX = entity.getEnemyPlayer().pos.x - entity.size.x / 2;
+            Logger.log(this, wantedX, entity.size.x / 2, entity.getEnemyPlayer().pos.x);
             this.startX = entity.pos.x;
 
             if(Math.abs(wantedX - startX) > Constants.MAX_GROUND_POUND_DISTANCE) {
@@ -87,6 +88,10 @@ public enum GroundPoundState implements State<BossPlayer> {
                 entity.getRenderer().startGPDust();
                 entity.getContainingScreen().setScreenShakes(3);
             }
+
+            if(entity.isGroundPounding() && entity.getEnemyPlayer().isTouchingEnemy()) {
+                entity.getEnemyPlayer().attacked(20);
+            }
         }
     },
 
@@ -96,9 +101,6 @@ public enum GroundPoundState implements State<BossPlayer> {
     GLOBAL() {
         @Override
         public void update(BossPlayer entity) {
-            if(entity.isGroundPounding() && entity.getEnemyPlayer().isTouchingEnemy()) {
-                entity.getEnemyPlayer().attacked(20);
-            }
         }
     }
     ;

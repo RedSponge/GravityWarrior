@@ -17,11 +17,11 @@ public class DesktopLauncher {
 
     private static LwjglApplicationConfiguration getDefaultConfiguration() {
         LwjglApplicationConfiguration configuration = new LwjglApplicationConfiguration();
-        configuration.title = "MixedBossBattle";
+        configuration.title = "Gravity Warrior";
         configuration.width = 640;
         configuration.height = 480;
         for (int size : new int[] { 128, 64, 32, 16 }) {
-            configuration.addIcon("libgdx" + size + ".png", FileType.Internal);
+            configuration.addIcon("icon" + size + ".png", FileType.Internal);
         }
         return configuration;
     }

@@ -25,8 +25,6 @@ public class IntroEnemy extends PActor implements IUpdated, IRenderer {
     public static final AssetDescriptor[] REQUIRED_ASSETS = {Enemy.unpowered, Enemy.poweredOverlay};
     private final int renderWidth;
     private final int renderHeight;
-    private IntroState introState;
-
 
     private HashMap<String, Pair<Animation<TextureRegion>, Animation<TextureRegion>>> animations;
     private float timePassed;
@@ -37,13 +35,13 @@ public class IntroEnemy extends PActor implements IUpdated, IRenderer {
         pos.x = pos.y = 100;
         size.x = Constants.PLAYER_WIDTH;
         size.y = Constants.PLAYER_HEIGHT;
-        introState = IntroState.PART_1;
-
 
         renderWidth = 64/2;
         renderHeight = 96/2;
 
         vel = new IntVector2(0, 0);
+
+
 
         initAnimation(assets);
     }
@@ -77,10 +75,6 @@ public class IntroEnemy extends PActor implements IUpdated, IRenderer {
 
 
         batch.draw(toDraw, pos.x + xOff, pos.y + yOff, renderWidth, renderHeight);
-    }
-
-    public void setIntroState(IntroState introState) {
-        this.introState = introState;
     }
 
     @Override

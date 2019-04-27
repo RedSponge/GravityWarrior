@@ -8,7 +8,6 @@ import com.badlogic.gdx.ai.msg.Telegraph;
 import com.badlogic.gdx.assets.AssetDescriptor;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.utils.TimeUtils;
 import com.redsponge.upsidedownbb.assets.AssetDescBin.Boss;
 import com.redsponge.upsidedownbb.assets.Assets;
 import com.redsponge.upsidedownbb.game.MessageType;
@@ -21,7 +20,6 @@ import com.redsponge.upsidedownbb.physics.PActor;
 import com.redsponge.upsidedownbb.physics.PhysicsWorld;
 import com.redsponge.upsidedownbb.screen.GameScreen;
 import com.redsponge.upsidedownbb.utils.Constants;
-import com.redsponge.upsidedownbb.utils.GeneralUtils;
 import com.redsponge.upsidedownbb.utils.Settings;
 
 public class BossPlayer extends PActor implements IUpdated, Telegraph {
@@ -59,7 +57,7 @@ public class BossPlayer extends PActor implements IUpdated, Telegraph {
         this.containingScreen = containingScreen;
         input = new SimpleInputTranslator();
         size.set(Constants.BOSS_WIDTH, Constants.BOSS_HEIGHT);
-        pos.set((int) (Constants.ARENA_WIDTH / 2 - size.x / 2), 100);
+        pos.set((int) (Constants.ARENA_WIDTH / 2 - size.x / 2), Constants.FLOOR_HEIGHT);
 
         vel = new Vector2(0, 0);
         dashTimeCounter = 0;
@@ -160,11 +158,12 @@ public class BossPlayer extends PActor implements IUpdated, Telegraph {
 
     private void beginGroundPound() {
         gpTimeCounter = 0;
-        groundPoundStateMachine.changeState(GroundPoundState.RAISE);
+        groundPoundStateMachine.changeState(GroundPoundState.RISE);
         gpRiseSound.play(Settings.soundVol);
     }
 
-    public void attacked(int health) {
+    public void attacked(int health, boolean bypassInvincibility) {
+        if(timeSinceHit < 0.5f && !bypassInvincibility) return;
         if(groundPoundStateMachine.getCurrentState() != GroundPoundState.INACTIVE) return;
 
         this.health -= health;

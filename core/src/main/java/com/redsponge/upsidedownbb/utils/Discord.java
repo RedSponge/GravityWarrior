@@ -28,6 +28,7 @@ public class Discord {
         DiscordRPC.INSTANCE.Discord_Initialize(appId, handlers, true, steamId);
         presence.details = "#meowmeowmeow!";
         presence.state = "meow";
+        presence.largeImageKey = "gravity_warrior_icon";
         DiscordRPC.INSTANCE.Discord_UpdatePresence(presence);
         thread = new Thread(new Runnable() {
             @Override

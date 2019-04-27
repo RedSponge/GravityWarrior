@@ -1,5 +1,6 @@
 package com.redsponge.upsidedownbb.game.enemy;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.ai.fsm.State;
 import com.badlogic.gdx.ai.msg.Telegram;
 import com.badlogic.gdx.math.MathUtils;
@@ -9,11 +10,19 @@ public enum EnemyPlayerState implements State<EnemyPlayer> {
 
     RUN_AWAY() {
 
+        private float timeSinceAttack;
+
+        @Override
+        public void enter(EnemyPlayer entity) {
+            timeSinceAttack = 0;
+        }
+
         @Override
         public void update(EnemyPlayer entity) {
+            timeSinceAttack += Gdx.graphics.getDeltaTime();
             entity.moveAwayFromBoss();
-            if(MathUtils.randomBoolean(1) && (entity.distanceFromBoss() > 100 || entity.isTouchingWalls())) {
-                if(MathUtils.randomBoolean() || true) {
+            if(MathUtils.randomBoolean(0.01f) || timeSinceAttack > 5 || entity.isTouchingWalls()) {
+                if(MathUtils.randomBoolean()) {
                     entity.getStateMachine().changeState(SUPER_ATTACK_FROM_TOP);
                 } else {
                     entity.getStateMachine().changeState(RUN_TO_ATTACK);
@@ -39,7 +48,7 @@ public enum EnemyPlayerState implements State<EnemyPlayer> {
 
         @Override
         public void enter(EnemyPlayer entity) {
-            numAttacks = MathUtils.random(5, 20);
+            numAttacks = MathUtils.random(2, 4);
         }
 
         @Override

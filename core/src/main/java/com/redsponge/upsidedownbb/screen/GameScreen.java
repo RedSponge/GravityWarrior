@@ -1,6 +1,7 @@
 package com.redsponge.upsidedownbb.screen;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.ai.GdxAI;
 import com.badlogic.gdx.ai.msg.MessageManager;
@@ -33,6 +34,7 @@ import com.badlogic.gdx.utils.Scaling;
 import com.badlogic.gdx.utils.TimeUtils;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.ScalingViewport;
+import com.redsponge.upsidedownbb.GravityWarrior;
 import com.redsponge.upsidedownbb.assets.AssetDescBin.Background;
 import com.redsponge.upsidedownbb.assets.AssetDescBin.Boss;
 import com.redsponge.upsidedownbb.assets.AssetDescBin.Fonts;
@@ -101,6 +103,10 @@ public class GameScreen extends AbstractScreen implements InputProcessor {
 
     @Override
     public void show() {
+        GravityWarrior.discord.setPresenceDetails("In The Arena!");
+        GravityWarrior.discord.setPresenceState("");
+        GravityWarrior.discord.updatePresence();
+
         Gdx.input.setInputProcessor(this);
 
         assets.finishLoading();
@@ -153,7 +159,7 @@ public class GameScreen extends AbstractScreen implements InputProcessor {
         arenaBackground = assets.get(Background.arena);
         sky = assets.get(Background.sky);
 
-        backgroundMusic = Gdx.audio.newMusic(Gdx.files.internal("music/fight_with_a_cube.wav"));
+        backgroundMusic = Gdx.audio.newMusic(Gdx.files.internal("music/fight_with_a_cube.ogg"));
         backgroundMusic.setLooping(true);
         backgroundMusic.setVolume(0.5f);
         backgroundMusic.play();
@@ -199,7 +205,6 @@ public class GameScreen extends AbstractScreen implements InputProcessor {
         FieldSlider musicSlider = new FieldSlider(0, 100, 1, false, pauseSkin, Settings.class, null, "musicVol");
         music.add(musicL, musicSlider);
 
-
         Table sound = new Table(pauseSkin);
         Label soundL = new Label("Sound: ", pauseSkin);
 
@@ -223,10 +228,10 @@ public class GameScreen extends AbstractScreen implements InputProcessor {
         music.pack();
         sound.pack();
 
-        title.setPosition(pauseViewport.getWorldWidth() / 2, 240, Align.bottom);
-        music.setPosition(pauseViewport.getWorldWidth() / 2, 180, Align.bottom);
-        sound.setPosition(pauseViewport.getWorldWidth() / 2, 140, Align.bottom);
-        keys.setPosition(pauseViewport.getWorldWidth() / 2, 70, Align.bottom);
+        title.setPosition(pauseViewport.getWorldWidth() / 2, 250, Align.bottom);
+        music.setPosition(pauseViewport.getWorldWidth() / 2, 190, Align.bottom);
+        sound.setPosition(pauseViewport.getWorldWidth() / 2, 150, Align.bottom);
+        keys.setPosition(pauseViewport.getWorldWidth() / 2, 80, Align.bottom);
 
         Button backToGame = new TextButton("Back To Game", pauseSkin);
         backToGame.setPosition(pauseViewport.getWorldWidth() / 2, 40, Align.bottom);
@@ -345,8 +350,6 @@ public class GameScreen extends AbstractScreen implements InputProcessor {
         batch.draw(arenaBackground, 0, 0);
         batch.end();
 
-        pdr.render(world, gameViewport.getCamera().combined);
-
         camPos.set(unshaken);
 
         guiViewport.apply();
@@ -384,11 +387,15 @@ public class GameScreen extends AbstractScreen implements InputProcessor {
         barOutline.draw(batch, barDistFromWalls, barY, barWidth, barHeight);
         barOutline.draw(batch, guiViewport.getWorldWidth() - barDistFromWalls - barWidth, barY, barWidth, barHeight);
 
+        if(boss.getHealth() > 0) {
+            batch.setColor(new Color(Constants.BOSS_BAR_COLOR + alphaMult));
+            barInside.draw(batch, barDistFromWalls, barY, barWidth * boss.getHealth() / Constants.BOSS_MAX_HEALTH, barHeight);
+        }
 
-        batch.setColor(new Color(Constants.BOSS_BAR_COLOR + alphaMult));
-        barInside.draw(batch, barDistFromWalls, barY, barWidth * boss.getHealth() / Constants.BOSS_MAX_HEALTH, barHeight);
-        batch.setColor(new Color(Constants.PLAYER_BAR_COLOR + alphaMult));
-        barInside.draw(batch, guiViewport.getWorldWidth() - barDistFromWalls - barWidth, barY, barWidth * enemyPlayer.getHealth() / Constants.PLAYER_MAX_HEALTH, barHeight);
+        if(enemyPlayer.getHealth() > 0) {
+            batch.setColor(new Color(Constants.PLAYER_BAR_COLOR + alphaMult));
+            barInside.draw(batch, guiViewport.getWorldWidth() - barDistFromWalls - barWidth, barY, barWidth * enemyPlayer.getHealth() / Constants.PLAYER_MAX_HEALTH, barHeight);
+        }
 
         final String drawnText;
         if(boss.getHealth() <= 0) {
@@ -396,7 +403,7 @@ public class GameScreen extends AbstractScreen implements InputProcessor {
         } else if(enemyPlayer.getHealth() <= 0) {
             drawnText = "You Won!";
         } else if(!Settings.knowsHowToMove){
-            drawnText = "Welcome! Click anywhere to make the boss move!";
+            drawnText = "Welcome!\nYou may have thought that you play as " + Settings.playerName + "...\nBut they're their own person!\n\nNo.. you play the boss! :D\n\nClick anywhere to make the boss move!";
         }  else if(!Settings.knowsPowers) {
             drawnText = "Up in the top left corner are your powers!\n(use ESC to see & change controls)\nyour mission is to defeat " + Settings.playerName + ". Good Luck!" +
                     "\npress any key to continue";
@@ -405,7 +412,7 @@ public class GameScreen extends AbstractScreen implements InputProcessor {
         }
 
 
-        String pressAnyKeyText = "Press any key to go back to menu";
+        String pressAnyKeyText = "Press R to restart and any other key to go back to menu";
         GlyphLayout layout;
         GlyphLayout pressAnyKeyLayout;
 
@@ -452,14 +459,14 @@ public class GameScreen extends AbstractScreen implements InputProcessor {
 
         shapeRenderer.end();
 
-        if(drawnText != null) {
+        if(drawnText != null && !gameFinished) {
             guiViewport.apply();
             batch.setProjectionMatrix(guiViewport.getCamera().combined);
 
             batch.begin();
             font.setColor(new Color(1, 1, 1, 1));
             font.getData().setScale(0.5f);
-            font.draw(batch, drawnText, guiViewport.getWorldWidth() / 2 - layout.width / 4, 150);
+            font.draw(batch, drawnText, guiViewport.getWorldWidth() / 2 - layout.width / 2, 150);
 
             batch.end();
         }
@@ -477,7 +484,7 @@ public class GameScreen extends AbstractScreen implements InputProcessor {
 
 
 
-        if(layout != null) {
+        if(layout != null && gameFinished) {
             batch.begin();
             font.setColor(new Color(1, 1, 1, 1 - alphaMult / 255f));
             font.draw(batch, drawnText, guiViewport.getWorldWidth() / 2 - layout.width / 2, 150);
@@ -527,8 +534,13 @@ public class GameScreen extends AbstractScreen implements InputProcessor {
 
     @Override
     public boolean keyDown(int keycode) {
-        if(gameFinished) {
-            ga.transitionTo(new MenuScreen(ga), TransitionTemplates.sineSlide(1));
+        if(gameFinished && GeneralUtils.secondsSince(gameFinishTime) > 1) {
+            if(keycode == Keys.R) {
+                ga.transitionTo(new GameScreen(ga), TransitionTemplates.sineSlide(1));
+            } else {
+                ga.transitionTo(new MenuScreen(ga), TransitionTemplates.sineSlide(1));
+            }
+            Gdx.input.setInputProcessor(null);
         } else {
             if(!Settings.knowsPowers && Settings.knowsHowToMove) {
                 Settings.knowsPowers = true;

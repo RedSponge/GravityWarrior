@@ -184,7 +184,7 @@ public class EnemyPlayer extends PActor implements IUpdated, Telegraph {
         Logger.log(this, "Attacked Boss!");
         attackTimeCounter = 0;
         attackSound.play(Settings.soundVol);
-        boss.attacked(Constants.REGULAR_HIT_DAMAGE);
+        boss.attacked(Constants.REGULAR_HIT_DAMAGE, true);
     }
 
     public boolean isAttacking() {
@@ -226,8 +226,8 @@ public class EnemyPlayer extends PActor implements IUpdated, Telegraph {
             gravityAttackStateMachine.changeState(GravityAttackState.INACTIVE);
             stateMachine.changeState(EnemyPlayerState.GOT_HIT);
             hitSound.play(Settings.soundVol);
+            this.health -= health;
         }
-        this.health -= health;
     }
 
     public boolean hasRecoveredFromHit() {

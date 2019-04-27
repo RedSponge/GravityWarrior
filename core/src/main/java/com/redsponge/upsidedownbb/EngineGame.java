@@ -45,7 +45,7 @@ public abstract class EngineGame extends Game {
 
         transitionManager.resize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 
-        discord = new Discord("553575233018265601", "");
+        discord = new Discord("571763236807114753", "");
         init();
     }
 

@@ -23,12 +23,18 @@ public class Settings {
     public static void setDefaults() {
         keyDash = Keys.SHIFT_LEFT;
         keyGroundPound = Keys.SPACE;
-        keyPunch = Keys.Z;
+        keyPunch = Keys.X;
         keyPause = Keys.ESCAPE;
 
-        musicVol = 0;
-        soundVol = 0;
-        playerName = "Bobby";
+        musicVol = 50;
+        soundVol = 50;
+
+        playerName = GeneralUtils.getCurrentUserName();
+        if(playerName == null) {
+            playerName = GeneralUtils.randomItem(Constants.RANDOM_PLAYER_NAMES);
+        }
+
+        playerName = GeneralUtils.capitalizeWord(playerName).split(" ")[0];
 
         knowsPowers = false;
         knowsHowToMove = false;

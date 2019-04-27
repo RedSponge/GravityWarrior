@@ -23,7 +23,7 @@ configure(subprojects) {
 
 subprojects {
   version = '1.0'
-  ext.appName = 'MixedBossBattle'
+  ext.appName = 'GravityWarrior'
   repositories {
     mavenLocal()
     mavenCentral()

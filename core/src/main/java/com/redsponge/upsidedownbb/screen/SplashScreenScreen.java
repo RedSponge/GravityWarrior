@@ -40,12 +40,12 @@ public class SplashScreenScreen extends AbstractScreen {
 
     @Override
     public void render() {
-        Gdx.gl.glClearColor(0.90f, 0.85f, 0.66f, 1);
+        Gdx.gl.glClearColor(1, 0.85f, 0.66f, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
         splashScreenRenderer.render();
 
         if((splashScreenRenderer.isComplete() || skipped) && !transitioning) {
-            ga.transitionTo(new MenuScreen(ga), TransitionTemplates.sineSlide(1));
+            ga.transitionTo(new MenuScreen(ga), TransitionTemplates.linearFade(1));
         }
     }
 
