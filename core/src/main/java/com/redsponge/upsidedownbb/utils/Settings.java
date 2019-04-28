@@ -26,7 +26,7 @@ public class Settings {
         keyPunch = Keys.X;
         keyPause = Keys.ESCAPE;
 
-        musicVol = 0;
+        musicVol = 50;
         soundVol = 50;
 
         playerName = GeneralUtils.getCurrentUserName();
