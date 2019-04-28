@@ -27,6 +27,7 @@ import com.redsponge.upsidedownbb.transitions.TransitionTemplates;
 import com.redsponge.upsidedownbb.utils.Constants;
 import com.redsponge.upsidedownbb.utils.GameAccessor;
 import com.redsponge.upsidedownbb.utils.GeneralUtils;
+import com.redsponge.upsidedownbb.utils.Logger;
 import com.redsponge.upsidedownbb.utils.Settings;
 
 public class IntroScreen extends AbstractScreen implements InputProcessor {
@@ -107,8 +108,8 @@ public class IntroScreen extends AbstractScreen implements InputProcessor {
         Gdx.input.setInputProcessor(this);
 
         backgroundMusic = Gdx.audio.newMusic(Gdx.files.internal("music/prepare_to_fight.ogg"));
+        backgroundMusic.setVolume(Settings.musicVol / 100);
         backgroundMusic.setLooping(true);
-        backgroundMusic.setVolume(Settings.musicVol);
         backgroundMusic.play();
 
         startTime = TimeUtils.nanoTime();

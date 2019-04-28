@@ -85,8 +85,8 @@ public class MenuScreen extends AbstractScreen {
         Gdx.input.setInputProcessor(stage);
         backgroundMusic = Gdx.audio.newMusic(Gdx.files.internal("music/welcome_warrior.ogg"));
         backgroundMusic.setLooping(true);
-        backgroundMusic.setVolume(Settings.musicVol);
         backgroundMusic.play();
+        backgroundMusic.setVolume(Settings.musicVol);
     }
 
     public void setupMenuButtons() {
@@ -188,7 +188,12 @@ public class MenuScreen extends AbstractScreen {
 
         FieldSlider musicSlider = new FieldSlider(0, 100, 1, false, skin, Settings.class, null, "musicVol");
         music.add(musicL, musicSlider);
-
+        music.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                backgroundMusic.setVolume(Settings.musicVol / 100f);
+            }
+        });
 
         Table sound = new Table(skin);
         Label soundL = new Label("Sound: ", skin);
@@ -310,7 +315,6 @@ public class MenuScreen extends AbstractScreen {
 
     @Override
     public void tick(float delta) {
-        backgroundMusic.setVolume(Settings.musicVol / 100f);
         xSkyOffset += delta * 20;
         if(xSkyOffset > sky.getWidth()) {
             xSkyOffset -= sky.getWidth();
@@ -350,6 +354,7 @@ public class MenuScreen extends AbstractScreen {
     @Override
     public void dispose() {
         stage.dispose();
+        backgroundMusic.stop();
         backgroundMusic.dispose();
     }
 

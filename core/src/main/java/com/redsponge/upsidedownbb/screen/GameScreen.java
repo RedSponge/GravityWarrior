@@ -20,6 +20,7 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.Stage;
@@ -28,6 +29,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
+import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Scaling;
@@ -161,7 +163,7 @@ public class GameScreen extends AbstractScreen implements InputProcessor {
 
         backgroundMusic = Gdx.audio.newMusic(Gdx.files.internal("music/fight_with_a_cube.ogg"));
         backgroundMusic.setLooping(true);
-        backgroundMusic.setVolume(0.5f);
+        backgroundMusic.setVolume(Settings.musicVol);
         backgroundMusic.play();
 
         TextureAtlas bar = assets.get(General.bar);
@@ -204,6 +206,12 @@ public class GameScreen extends AbstractScreen implements InputProcessor {
 
         FieldSlider musicSlider = new FieldSlider(0, 100, 1, false, pauseSkin, Settings.class, null, "musicVol");
         music.add(musicL, musicSlider);
+        musicSlider.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                backgroundMusic.setVolume(Settings.musicVol / 100f);
+            }
+        });
 
         Table sound = new Table(pauseSkin);
         Label soundL = new Label("Sound: ", pauseSkin);
@@ -265,7 +273,6 @@ public class GameScreen extends AbstractScreen implements InputProcessor {
 
     @Override
     public void tick(float delta) {
-        backgroundMusic.setVolume(Settings.musicVol / 100f);
         if(paused) {
             pauseMenu.act();
             return;
