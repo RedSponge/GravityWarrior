@@ -22,7 +22,7 @@ configure(subprojects) {
 }
 
 subprojects {
-  version = '1.02'
+  version = '1.0.3'
   ext.appName = 'GravityWarrior'
   repositories {
     mavenLocal()
